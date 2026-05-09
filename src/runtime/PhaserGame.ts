@@ -92,14 +92,19 @@ class GameScene extends Phaser.Scene {
     }
 
     // Actors with a "block" collide behavior become the static surface
-    // (platforms / walls) — make them immovable and gravity-free so the
-    // player can land on them.
+    // (platforms / walls) — make them immovable so the player can land
+    // on them. If they ALSO have gravity / platformer, the kid asked
+    // for a moving thing, so leave it movable — otherwise our blocker
+    // logic would silently override "Falls".
     for (const [, sprite] of this.actorSprites) {
       const actor = this.spriteToActor.get(sprite)!;
       const isBlocker = actor.behaviors.some(
         (b) => b.kind === "collide" && b.effect === "block"
       );
-      if (isBlocker) {
+      const isMoving = actor.behaviors.some(
+        (b) => b.kind === "gravity" || b.kind === "platformer"
+      );
+      if (isBlocker && !isMoving) {
         sprite.setImmovable(true);
         const body = sprite.body as Phaser.Physics.Arcade.Body | null;
         if (body) body.setAllowGravity(false);
