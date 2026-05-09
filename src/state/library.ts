@@ -5,6 +5,8 @@ import type { GameProject } from "../types";
 // can later be backed by a remote service without touching callers.
 
 const PREFIX = "game:";
+const RECENT_KEY = "recent-stickers";
+const RECENT_MAX = 24;
 
 export async function listGames(): Promise<GameProject[]> {
   const allKeys = await keys();
@@ -27,4 +29,15 @@ export async function saveGame(game: GameProject): Promise<void> {
 
 export async function deleteGame(id: string): Promise<void> {
   await del(PREFIX + id);
+}
+
+export async function getRecentStickers(): Promise<string[]> {
+  const v = await get<string[]>(RECENT_KEY);
+  return Array.isArray(v) ? v : [];
+}
+
+export async function pushRecentSticker(stockId: string): Promise<void> {
+  const cur = await getRecentStickers();
+  const next = [stockId, ...cur.filter((id) => id !== stockId)].slice(0, RECENT_MAX);
+  await set(RECENT_KEY, next);
 }
