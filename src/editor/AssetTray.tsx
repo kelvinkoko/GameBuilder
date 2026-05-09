@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "../ui/Modal";
 import { BigButton } from "../ui/BigButton";
 import { useProjectStore } from "../state/projectStore";
 import { CATEGORIES, findStock, STOCK_STICKERS, type StockCategory } from "../assets/stock";
 import { getRecentStickers, pushRecentSticker } from "../state/library";
+import { STAGE_SIZE } from "./SceneCanvas";
 import type { Asset } from "../types";
 
 type Props = {
@@ -16,27 +17,114 @@ function srcOf(asset: Asset): string {
   return asset.source.dataUrl;
 }
 
+const DRAG_THRESHOLD_PX = 8;
+
 export function AssetTray({ onPickStock, onDraw }: Props) {
   const project = useProjectStore((s) => s.project);
   const addActor = useProjectStore((s) => s.addActor);
+  const [ghost, setGhost] = useState<{ asset: Asset; x: number; y: number } | null>(null);
+  const dragState = useRef<{
+    asset: Asset;
+    startX: number;
+    startY: number;
+    started: boolean;
+  } | null>(null);
 
   if (!project) return null;
+
+  function onPointerDown(e: React.PointerEvent<HTMLButtonElement>, asset: Asset) {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragState.current = {
+      asset,
+      startX: e.clientX,
+      startY: e.clientY,
+      started: false
+    };
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = dragState.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (!d.started && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
+      d.started = true;
+    }
+    if (d.started) {
+      setGhost({ asset: d.asset, x: e.clientX, y: e.clientY });
+    }
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = dragState.current;
+    dragState.current = null;
+    setGhost(null);
+    if (!d) return;
+    if (!d.started) {
+      // Treat as a tap → drop at stage centre, like before.
+      addActor(d.asset.id, STAGE_SIZE.w / 2, STAGE_SIZE.h / 2, d.asset.tag ?? "thing");
+      return;
+    }
+    // Drag end: drop on the stage if cursor is over it.
+    const stage = document.querySelector(".stage") as HTMLElement | null;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    if (
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom
+    ) {
+      const x = ((e.clientX - rect.left) / rect.width) * STAGE_SIZE.w;
+      const y = ((e.clientY - rect.top) / rect.height) * STAGE_SIZE.h;
+      addActor(d.asset.id, x, y, d.asset.tag ?? "thing");
+    }
+    // Dropped outside the stage: do nothing.
+  }
+
+  function onPointerCancel() {
+    dragState.current = null;
+    setGhost(null);
+  }
+
   return (
-    <div className="tray">
-      <BigButton icon="✏️" label="Draw" variant="good" onClick={onDraw} />
-      <BigButton icon="🧸" label="Add" variant="info" onClick={onPickStock} />
-      {project.assets.map((asset) => (
-        <button
-          key={asset.id}
-          className="sticker"
-          onClick={() => addActor(asset.id, 400, 300, asset.tag ?? "thing")}
-          aria-label={`Place ${asset.name}`}
-          title={`Place ${asset.name}`}
-        >
-          <img src={srcOf(asset)} alt={asset.name} />
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="tray">
+        <BigButton icon="✏️" label="Draw" variant="good" onClick={onDraw} />
+        <BigButton icon="🧸" label="Add" variant="info" onClick={onPickStock} />
+        {project.assets.map((asset) => (
+          <button
+            key={asset.id}
+            className="sticker"
+            onPointerDown={(e) => onPointerDown(e, asset)}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            aria-label={`Place ${asset.name}`}
+            title={`Tap or drag onto the stage`}
+          >
+            <img src={srcOf(asset)} alt={asset.name} draggable={false} />
+          </button>
+        ))}
+      </div>
+      {ghost && (
+        <img
+          src={srcOf(ghost.asset)}
+          alt=""
+          style={{
+            position: "fixed",
+            left: ghost.x - 40,
+            top: ghost.y - 40,
+            width: 80,
+            height: 80,
+            pointerEvents: "none",
+            opacity: 0.85,
+            zIndex: 1000,
+            filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.25))"
+          }}
+        />
+      )}
+    </>
   );
 }
 
