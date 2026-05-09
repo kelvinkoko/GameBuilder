@@ -40,7 +40,7 @@ export function BigButton({
       }}
     >
       {icon && <span className="ico">{icon}</span>}
-      {!iconOnly && label && <span>{label}</span>}
+      {!iconOnly && label && <span className="label">{label}</span>}
       {children}
     </button>
   );
