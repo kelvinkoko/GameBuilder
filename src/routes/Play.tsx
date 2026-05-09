@@ -52,16 +52,19 @@ export function Play({ onBack }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<GameHandle | null>(null);
   const [score, setScore] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [end, setEnd] = useState<"win" | "lose" | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!project || !hostRef.current) return;
     setScore(0);
+    setSecondsLeft(null);
     setEnd(null);
     const handle = startGame(hostRef.current, project, {
       onScore: (s) => setScore(s),
-      onEnd: (r) => setEnd(r)
+      onEnd: (r) => setEnd(r),
+      onTime: (s) => setSecondsLeft(s)
     });
     handleRef.current = handle;
     return () => {
@@ -133,6 +136,12 @@ export function Play({ onBack }: Props) {
         <BigButton icon="↩️" label="Edit" variant="ghost" onClick={onBack} />
         <div className="score">
           {hasScore && (goalTarget ? `⭐ ${score} / ${goalTarget}` : `⭐ ${score}`)}
+          {hasScore && secondsLeft !== null && "  "}
+          {secondsLeft !== null && (
+            <span style={{ color: secondsLeft <= 5 ? "#ef476f" : undefined }}>
+              ⏱️ {secondsLeft}
+            </span>
+          )}
         </div>
         <BigButton
           icon="🔄"

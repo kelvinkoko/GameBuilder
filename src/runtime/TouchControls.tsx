@@ -8,10 +8,35 @@ type Props = {
   onChange: (key: Key, down: boolean) => void;
 };
 
+function Arrow({ dir }: { dir: "up" | "down" | "left" | "right" }) {
+  const rot = dir === "up" ? 0 : dir === "right" ? 90 : dir === "down" ? 180 : 270;
+  return (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 40 40"
+      style={{ transform: `rotate(${rot}deg)`, display: "block" }}
+      aria-hidden
+    >
+      <polygon points="20,6 35,30 5,30" fill="currentColor" />
+    </svg>
+  );
+}
+
+function JumpIcon() {
+  return (
+    <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden>
+      <path
+        d="M26 6 L42 26 L33 26 L33 44 L19 44 L19 26 L10 26 Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function TouchControls({ showDpad, showJump, onChange }: Props) {
   const [held, setHeld] = useState<Set<Key>>(new Set());
 
-  // Release everything if the component unmounts mid-press.
   useEffect(() => {
     return () => {
       for (const k of held) onChange(k, false);
@@ -29,7 +54,7 @@ export function TouchControls({ showDpad, showJump, onChange }: Props) {
     onChange(k, down);
   }
 
-  function bind(k: Key) {
+  function bind(k: Key, extraClass = "") {
     return {
       onPointerDown: (e: React.PointerEvent) => {
         e.preventDefault();
@@ -45,7 +70,7 @@ export function TouchControls({ showDpad, showJump, onChange }: Props) {
         if ((e.buttons & 1) === 0) return;
         press(k, false);
       },
-      className: `touch-btn ${held.has(k) ? "held" : ""}`
+      className: `touch-btn ${extraClass} ${held.has(k) ? "held" : ""}`
     };
   }
 
@@ -53,17 +78,27 @@ export function TouchControls({ showDpad, showJump, onChange }: Props) {
     <div className="touch-controls">
       {showDpad ? (
         <div className="pad-cluster">
-          <button {...bind("up")} className={`touch-btn pad-up ${held.has("up") ? "held" : ""}`}>⬆</button>
-          <button {...bind("left")} className={`touch-btn pad-left ${held.has("left") ? "held" : ""}`}>⬅</button>
-          <button {...bind("right")} className={`touch-btn pad-right ${held.has("right") ? "held" : ""}`}>➡</button>
-          <button {...bind("down")} className={`touch-btn pad-down ${held.has("down") ? "held" : ""}`}>⬇</button>
+          <button {...bind("up", "pad-up")} aria-label="Up">
+            <Arrow dir="up" />
+          </button>
+          <button {...bind("left", "pad-left")} aria-label="Left">
+            <Arrow dir="left" />
+          </button>
+          <button {...bind("right", "pad-right")} aria-label="Right">
+            <Arrow dir="right" />
+          </button>
+          <button {...bind("down", "pad-down")} aria-label="Down">
+            <Arrow dir="down" />
+          </button>
         </div>
       ) : (
         <div />
       )}
       {showJump && (
         <div className="jump-cluster">
-          <button {...bind("jump")} className={`touch-btn jump ${held.has("jump") ? "held" : ""}`}>⤴</button>
+          <button {...bind("jump", "jump")} aria-label="Jump">
+            <JumpIcon />
+          </button>
         </div>
       )}
     </div>

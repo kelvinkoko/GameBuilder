@@ -16,12 +16,27 @@ type Props = {
   onHome: () => void;
 };
 
+function formatSeconds(s: number): string {
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return r === 0 ? `${m}m` : `${m}m${r}s`;
+}
+
 const GOAL_OPTIONS: { target: number | null; label: string; emoji: string }[] = [
   { target: null, label: "No goal", emoji: "🚫" },
   { target: 3, label: "3", emoji: "3️⃣" },
   { target: 5, label: "5", emoji: "5️⃣" },
   { target: 10, label: "10", emoji: "🔟" },
   { target: 20, label: "20", emoji: "💯" }
+];
+
+const TIME_OPTIONS: { seconds: number | null; label: string; emoji: string }[] = [
+  { seconds: null, label: "No timer", emoji: "🚫" },
+  { seconds: 30, label: "30 sec", emoji: "⏱️" },
+  { seconds: 60, label: "1 min", emoji: "⏱️" },
+  { seconds: 120, label: "2 min", emoji: "⏲️" },
+  { seconds: 300, label: "5 min", emoji: "⏲️" }
 ];
 
 export function Toolbar({ onPlay, onHome }: Props) {
@@ -31,6 +46,7 @@ export function Toolbar({ onPlay, onHome }: Props) {
   const setRules = useProjectStore((s) => s.setRules);
   const [bgOpen, setBgOpen] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [draftName, setDraftName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +69,11 @@ export function Toolbar({ onPlay, onHome }: Props) {
     currentGoal && currentGoal.kind === "scoreToWin"
       ? `Goal ⭐${currentGoal.target}`
       : "Goal";
+  const currentTime = project.rules.find((r) => r.kind === "timeLimit");
+  const timeLabel =
+    currentTime && currentTime.kind === "timeLimit"
+      ? `Time ${formatSeconds(currentTime.seconds)}`
+      : "Time";
 
   function commit() {
     const trimmed = draftName.trim();
@@ -70,11 +91,22 @@ export function Toolbar({ onPlay, onHome }: Props) {
     setGoalOpen(false);
   }
 
+  function setTime(seconds: number | null) {
+    const remaining = project!.rules.filter((r) => r.kind !== "timeLimit");
+    if (seconds === null) {
+      setRules(remaining);
+    } else {
+      setRules([...remaining, { kind: "timeLimit", seconds }]);
+    }
+    setTimeOpen(false);
+  }
+
   return (
     <div className="toolrow">
       <BigButton icon="🏠" label="Home" variant="ghost" onClick={onHome} />
       <BigButton icon="🎨" label="Background" variant="info" onClick={() => setBgOpen(true)} />
       <BigButton icon="🎯" label={goalLabel} variant="info" onClick={() => setGoalOpen(true)} />
+      <BigButton icon="⏱️" label={timeLabel} variant="info" onClick={() => setTimeOpen(true)} />
       <div className="spacer" style={{ flex: 1 }} />
       <button
         className="game-name-btn"
@@ -128,6 +160,33 @@ export function Toolbar({ onPlay, onHome }: Props) {
               >
                 <span className="ico">{g.emoji}</span>
                 <span className="name">{g.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </Modal>
+
+      <Modal open={timeOpen} onClose={() => setTimeOpen(false)}>
+        <h2>Time limit</h2>
+        <p className="confirm-text">
+          When time runs out, the game ends.
+        </p>
+        <div className="behavior-grid">
+          {TIME_OPTIONS.map((t) => {
+            const active =
+              (t.seconds === null && !currentTime) ||
+              (currentTime &&
+                currentTime.kind === "timeLimit" &&
+                currentTime.seconds === t.seconds);
+            return (
+              <button
+                key={String(t.seconds)}
+                className="behavior-card"
+                style={active ? { outline: "4px solid var(--accent)" } : undefined}
+                onClick={() => setTime(t.seconds)}
+              >
+                <span className="ico">{t.emoji}</span>
+                <span className="name">{t.label}</span>
               </button>
             );
           })}
