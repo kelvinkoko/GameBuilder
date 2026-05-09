@@ -1,12 +1,13 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
-// GitHub Pages serves at /<repo>/ — repo name is "GameBuilder".
-// VITE_BASE override lets local builds run at "/" if needed.
+// Default to root-domain hosting (Cloudflare Pages, custom domains, dev).
+// The GitHub Pages workflow sets VITE_BASE=/GameBuilder/ when it builds,
+// since that hosts under /<repo>/.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
   return {
-    base: env.VITE_BASE ?? "/GameBuilder/",
+    base: env.VITE_BASE ?? "/",
     plugins: [react()],
     build: {
       target: "es2020",
