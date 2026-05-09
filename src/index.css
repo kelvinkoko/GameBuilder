@@ -543,4 +543,18 @@ img { -webkit-user-drag: none; user-select: none; }
     max-width: 40vw;
   }
   .topbar h1 { font-size: 18px; }
+
+  /* Give the canvas as much room as possible: drop the stage-wrap
+     padding, tighten the toolbar / tray, and shrink tap targets a
+     bit so the chrome doesn't dominate vertical space. */
+  :root { --tap: 56px; }
+  .editor .stage-wrap { padding: 0; }
+  .topbar { padding: 6px 12px; }
+  .toolrow { padding: 6px 8px; gap: 6px; }
+  .tray { padding: 6px 8px; gap: 6px; min-height: 0; }
+  .tray .sticker { width: 56px; height: 56px; }
+  .tray .sticker img { width: 44px; height: 44px; }
+  .iconbtn { font-size: 26px; }
+  .bigbtn .ico { font-size: 24px; }
+  .inspector { max-height: 28vh; padding: 6px 8px; }
 }
