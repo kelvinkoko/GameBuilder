@@ -169,6 +169,10 @@ img { -webkit-user-drag: none; user-select: none; }
   min-height: 0;
   overflow: hidden;
 }
+.editor .stage-wrap.bg-sky { background: linear-gradient(#bde0fe, #ffe5b4); }
+.editor .stage-wrap.bg-grass { background: linear-gradient(#caffbf, #80b918); }
+.editor .stage-wrap.bg-space { background: radial-gradient(#1a1b41, #07071a); }
+.editor .stage-wrap.bg-sea { background: linear-gradient(#90e0ef, #0077b6); }
 .stage {
   background: #cfe8ff;
   border-radius: var(--radius);
@@ -549,6 +553,12 @@ img { -webkit-user-drag: none; user-select: none; }
      bit so the chrome doesn't dominate vertical space. */
   :root { --tap: 56px; }
   .editor .stage-wrap { padding: 0; }
+  /* Merge stage into the (now-colored) wrap so aspect-ratio empty
+     bands look like part of the scene instead of empty space. */
+  .editor .stage-wrap .stage {
+    border-radius: 0;
+    box-shadow: none;
+  }
   .topbar { padding: 6px 12px; }
   .toolrow { padding: 6px 8px; gap: 6px; }
   .tray { padding: 6px 8px; gap: 6px; min-height: 0; }
