@@ -16,7 +16,8 @@
 html, body, #root { height: 100%; margin: 0; }
 
 body {
-  font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", system-ui, -apple-system, sans-serif;
+  font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", system-ui, -apple-system, sans-serif,
+    "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji";
   background: var(--bg);
   color: var(--ink);
   overscroll-behavior: none;
