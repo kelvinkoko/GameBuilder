@@ -28,6 +28,7 @@ function describe(b: Behavior): { ico: string; name: string } {
         case "vanish": return { ico: "💨", name: "Tap: gone" };
         case "grow": return { ico: "🔼", name: "Tap: grow" };
         case "shrink": return { ico: "🔽", name: "Tap: shrink" };
+        case "score": return { ico: "⭐", name: "Tap: score" };
       }
       break;
     case "collide":

@@ -108,13 +108,32 @@ export function Play({ onBack }: Props) {
     return { dpad, jump };
   }, [project]);
 
+  const hasScore = useMemo(() => {
+    if (!project) return false;
+    if (project.rules.some((r) => r.kind === "scoreToWin")) return true;
+    for (const a of project.actors) {
+      for (const b of a.behaviors) {
+        if (b.kind === "collide" && b.effect === "score") return true;
+        if (b.kind === "onTap" && b.action === "score") return true;
+      }
+    }
+    return false;
+  }, [project]);
+
+  const goalTarget = useMemo(() => {
+    const r = project?.rules.find((r) => r.kind === "scoreToWin");
+    return r && r.kind === "scoreToWin" ? r.target : null;
+  }, [project]);
+
   if (!project) return null;
 
   return (
     <div ref={rootRef} className="play">
       <div className="play-topbar">
         <BigButton icon="↩️" label="Edit" variant="ghost" onClick={onBack} />
-        <div className="score">⭐ {score}</div>
+        <div className="score">
+          {hasScore && (goalTarget ? `⭐ ${score} / ${goalTarget}` : `⭐ ${score}`)}
+        </div>
         <BigButton
           icon="🔄"
           label="Restart"
@@ -137,6 +156,9 @@ export function Play({ onBack }: Props) {
         <div className="endcard">
           <span className="big-emoji">{end === "win" ? "🏆" : "😿"}</span>
           <h1>{end === "win" ? "You win!" : "Try again!"}</h1>
+          {score > 0 && (
+            <div style={{ fontSize: 28, fontWeight: 800 }}>⭐ {score}</div>
+          )}
           <div className="row" style={{ justifyContent: "center" }}>
             <BigButton
               icon="🔄"
