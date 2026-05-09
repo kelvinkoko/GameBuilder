@@ -39,65 +39,52 @@ export function blankTemplate(): GameProject {
   };
 }
 
-export function catchTemplate(): GameProject {
-  // Falling treats, follow-pointer player, score on collide.
-  const player = stockAsset("ball", "player");
-  const treat = stockAsset("star", "treat");
-  return {
-    id: uuid(),
-    name: "Catch the stars",
-    template: "catch",
-    background: { kind: "preset", value: "sky" },
-    assets: [player, treat],
-    actors: [
-      placeActor(player, 400, 520, [
-        { kind: "move", dir: "follow", speed: 3 }
-      ]),
-      placeActor(treat, 120, 60, [
-        { kind: "move", dir: "down", speed: 2 },
-        { kind: "collide", withTag: "player", effect: "score" }
-      ]),
-      placeActor(treat, 320, 60, [
-        { kind: "move", dir: "down", speed: 2 },
-        { kind: "collide", withTag: "player", effect: "score" }
-      ]),
-      placeActor(treat, 520, 60, [
-        { kind: "move", dir: "down", speed: 2 },
-        { kind: "collide", withTag: "player", effect: "score" }
-      ]),
-      placeActor(treat, 680, 60, [
-        { kind: "move", dir: "down", speed: 2 },
-        { kind: "collide", withTag: "player", effect: "score" }
-      ])
-    ],
-    rules: [{ kind: "scoreToWin", target: 3 }],
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  };
-}
-
 export function mazeTemplate(): GameProject {
-  // Walls block the player; touching the goal wins.
+  // 10x7 cell maze on an 80px grid (origin 40,40 → fits 800x600 stage).
+  // W = wall, . = corridor, P = player start, G = goal.
+  // Multiple paths and dead-ends by design.
+  const grid = [
+    "WWWWWWWWWW",
+    "WP..W....W",
+    "W.W.W.WW.W",
+    "W.W...W..W",
+    "W.WWW.W.WW",
+    "W........G",
+    "WWWWWWWWWW"
+  ];
+
   const player = stockAsset("frog", "player");
   const wall = stockAsset("brick", "wall");
   const goal = stockAsset("crown", "treat");
   const wallBehavior = [
     { kind: "collide" as const, withTag: "player", effect: "block" as const }
   ];
+
+  const cell = 80;
+  const ox = 40;
+  const oy = 40;
+  let playerActor: Actor | null = null;
+  let goalActor: Actor | null = null;
   const walls: Actor[] = [];
-  for (let x = 80; x <= 720; x += 80) {
-    walls.push(placeActor(wall, x, 60, wallBehavior));
-    walls.push(placeActor(wall, x, 540, wallBehavior));
+  for (let r = 0; r < grid.length; r++) {
+    const row = grid[r];
+    for (let c = 0; c < row.length; c++) {
+      const ch = row[c];
+      const x = ox + c * cell;
+      const y = oy + r * cell;
+      if (ch === "W") {
+        walls.push(placeActor(wall, x, y, wallBehavior));
+      } else if (ch === "P") {
+        playerActor = placeActor(player, x, y, [
+          { kind: "controllable", speed: 2 }
+        ]);
+      } else if (ch === "G") {
+        goalActor = placeActor(goal, x, y, [
+          { kind: "collide", withTag: "player", effect: "win" }
+        ]);
+      }
+    }
   }
-  for (let y = 140; y <= 460; y += 80) {
-    walls.push(placeActor(wall, 80, y, wallBehavior));
-    walls.push(placeActor(wall, 720, y, wallBehavior));
-  }
-  // A few inside obstacles.
-  walls.push(placeActor(wall, 240, 220, wallBehavior));
-  walls.push(placeActor(wall, 320, 220, wallBehavior));
-  walls.push(placeActor(wall, 480, 380, wallBehavior));
-  walls.push(placeActor(wall, 560, 380, wallBehavior));
 
   return {
     id: uuid(),
@@ -105,13 +92,7 @@ export function mazeTemplate(): GameProject {
     template: "maze",
     background: { kind: "preset", value: "grass" },
     assets: [player, wall, goal],
-    actors: [
-      placeActor(player, 200, 460, [{ kind: "controllable", speed: 2 }]),
-      ...walls,
-      placeActor(goal, 660, 140, [
-        { kind: "collide", withTag: "player", effect: "win" }
-      ])
-    ],
+    actors: [playerActor!, ...walls, goalActor!],
     rules: [],
     createdAt: Date.now(),
     updatedAt: Date.now()
@@ -169,7 +150,6 @@ export function platformerTemplate(): GameProject {
 
 export const TEMPLATES = [
   { id: "blank", name: "Blank", emoji: "🎨", build: blankTemplate },
-  { id: "catch", name: "Catch", emoji: "⭐", build: catchTemplate },
   { id: "maze", name: "Maze", emoji: "🧩", build: mazeTemplate },
   { id: "platformer", name: "Jump & run", emoji: "🦘", build: platformerTemplate }
 ];
