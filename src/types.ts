@@ -12,7 +12,7 @@ export type Asset = {
 export type MoveDir = "left" | "right" | "up" | "down" | "follow" | "wander";
 export type Speed = 1 | 2 | 3;
 
-export type TapAction = "sound" | "vanish" | "grow" | "shrink";
+export type TapAction = "sound" | "vanish" | "grow" | "shrink" | "score";
 export type CollideEffect = "score" | "vanish" | "win" | "lose" | "sound" | "block";
 
 export type Behavior =

@@ -32,7 +32,8 @@ const CARDS: Card[] = [
   { key: "tap-sound", ico: "🔊", name: "Tap: sound", build: () => ({ kind: "onTap", action: "sound" }) },
   { key: "tap-vanish", ico: "💨", name: "Tap: gone", build: () => ({ kind: "onTap", action: "vanish" }) },
   { key: "tap-grow", ico: "🔼", name: "Tap: grow", build: () => ({ kind: "onTap", action: "grow" }) },
-  { key: "tap-shrink", ico: "🔽", name: "Tap: shrink", build: () => ({ kind: "onTap", action: "shrink" }) }
+  { key: "tap-shrink", ico: "🔽", name: "Tap: shrink", build: () => ({ kind: "onTap", action: "shrink" }) },
+  { key: "tap-score", ico: "⭐", name: "Tap: score", build: () => ({ kind: "onTap", action: "score" }) }
 ];
 
 export function BehaviorPicker({ open, onClose, onAdd }: Props) {

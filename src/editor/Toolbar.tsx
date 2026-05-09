@@ -16,11 +16,21 @@ type Props = {
   onHome: () => void;
 };
 
+const GOAL_OPTIONS: { target: number | null; label: string; emoji: string }[] = [
+  { target: null, label: "No goal", emoji: "🚫" },
+  { target: 3, label: "3", emoji: "3️⃣" },
+  { target: 5, label: "5", emoji: "5️⃣" },
+  { target: 10, label: "10", emoji: "🔟" },
+  { target: 20, label: "20", emoji: "💯" }
+];
+
 export function Toolbar({ onPlay, onHome }: Props) {
   const project = useProjectStore((s) => s.project);
   const setBackground = useProjectStore((s) => s.setBackground);
   const setName = useProjectStore((s) => s.setName);
+  const setRules = useProjectStore((s) => s.setRules);
   const [bgOpen, setBgOpen] = useState(false);
+  const [goalOpen, setGoalOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [draftName, setDraftName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,16 +48,33 @@ export function Toolbar({ onPlay, onHome }: Props) {
 
   if (!project) return null;
 
+  const currentGoal = project.rules.find((r) => r.kind === "scoreToWin");
+  const goalLabel =
+    currentGoal && currentGoal.kind === "scoreToWin"
+      ? `Goal ⭐${currentGoal.target}`
+      : "Goal";
+
   function commit() {
     const trimmed = draftName.trim();
     if (trimmed) setName(trimmed);
     setRenameOpen(false);
   }
 
+  function setGoal(target: number | null) {
+    const remaining = project!.rules.filter((r) => r.kind !== "scoreToWin");
+    if (target === null) {
+      setRules(remaining);
+    } else {
+      setRules([...remaining, { kind: "scoreToWin", target }]);
+    }
+    setGoalOpen(false);
+  }
+
   return (
     <div className="toolrow">
       <BigButton icon="🏠" label="Home" variant="ghost" onClick={onHome} />
       <BigButton icon="🎨" label="Background" variant="info" onClick={() => setBgOpen(true)} />
+      <BigButton icon="🎯" label={goalLabel} variant="info" onClick={() => setGoalOpen(true)} />
       <div className="spacer" style={{ flex: 1 }} />
       <button
         className="game-name-btn"
@@ -77,6 +104,33 @@ export function Toolbar({ onPlay, onHome }: Props) {
               <span className="name">{p.name}</span>
             </button>
           ))}
+        </div>
+      </Modal>
+
+      <Modal open={goalOpen} onClose={() => setGoalOpen(false)}>
+        <h2>Score to win</h2>
+        <p className="confirm-text">
+          Reach this many ⭐ and the game is won!
+        </p>
+        <div className="behavior-grid">
+          {GOAL_OPTIONS.map((g) => {
+            const active =
+              (g.target === null && !currentGoal) ||
+              (currentGoal &&
+                currentGoal.kind === "scoreToWin" &&
+                currentGoal.target === g.target);
+            return (
+              <button
+                key={String(g.target)}
+                className="behavior-card"
+                style={active ? { outline: "4px solid var(--accent)" } : undefined}
+                onClick={() => setGoal(g.target)}
+              >
+                <span className="ico">{g.emoji}</span>
+                <span className="name">{g.label}</span>
+              </button>
+            );
+          })}
         </div>
       </Modal>
 

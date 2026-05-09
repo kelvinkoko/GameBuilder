@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import type { Actor, Asset, GameProject } from "../types";
+import type { Actor, Asset, GameProject, TapAction } from "../types";
 import { findStock } from "../assets/stock";
 import { sounds } from "../audio/sounds";
 
@@ -197,7 +197,8 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  handleTap(sprite: Phaser.Physics.Arcade.Sprite, action: "sound" | "vanish" | "grow" | "shrink") {
+  handleTap(sprite: Phaser.Physics.Arcade.Sprite, action: TapAction) {
+    if (this.ended) return;
     switch (action) {
       case "sound":
         sounds.boop();
@@ -213,6 +214,13 @@ class GameScene extends Phaser.Scene {
       case "shrink":
         sounds.ding();
         sprite.setScale(Math.max(sprite.scale * 0.8, sprite.getData("baseScale") * 0.25));
+        break;
+      case "score":
+        sounds.ding();
+        sprite.disableBody(true, true);
+        this.score += 1;
+        this.callbacks.onScore(this.score);
+        this.checkScoreWin();
         break;
     }
   }
@@ -237,10 +245,7 @@ class GameScene extends Phaser.Scene {
         self.disableBody(true, true);
         this.score += 1;
         this.callbacks.onScore(this.score);
-        const target = this.project.rules.find((r) => r.kind === "scoreToWin");
-        if (target && target.kind === "scoreToWin" && this.score >= target.target) {
-          this.endGame("win");
-        }
+        this.checkScoreWin();
         break;
       }
       case "win":
@@ -249,6 +254,13 @@ class GameScene extends Phaser.Scene {
       case "lose":
         this.endGame("lose");
         break;
+    }
+  }
+
+  checkScoreWin() {
+    const target = this.project.rules.find((r) => r.kind === "scoreToWin");
+    if (target && target.kind === "scoreToWin" && this.score >= target.target) {
+      this.endGame("win");
     }
   }
 
