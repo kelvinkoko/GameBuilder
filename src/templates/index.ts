@@ -230,10 +230,10 @@ export function aquariumTemplate(): GameProject {
 }
 
 export const TEMPLATES = [
-  { id: "blank", name: "Blank", emoji: "🎨", build: blankTemplate },
-  { id: "aquarium", name: "Aquarium", emoji: "🐠", build: aquariumTemplate },
   { id: "maze", name: "Maze", emoji: "🧩", build: mazeTemplate },
-  { id: "platformer", name: "Jump & run", emoji: "🦘", build: platformerTemplate }
+  { id: "platformer", name: "Jump & run", emoji: "🦘", build: platformerTemplate },
+  { id: "aquarium", name: "Aquarium", emoji: "🐠", build: aquariumTemplate },
+  { id: "blank", name: "Blank", emoji: "🎨", build: blankTemplate }
 ];
 
 // Bind unused export so tree-shaking does not complain about STOCK_STICKERS.
