@@ -28,6 +28,14 @@ function bgColor(project: GameProject): number {
   }
 }
 
+type TouchInput = {
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
+  jump: boolean;
+};
+
 class GameScene extends Phaser.Scene {
   private project!: GameProject;
   private callbacks!: GameCallbacks;
@@ -37,6 +45,7 @@ class GameScene extends Phaser.Scene {
   private score = 0;
   private ended = false;
   private pointer: { x: number; y: number } | null = null;
+  private touchInput: TouchInput = { left: false, right: false, up: false, down: false, jump: false };
 
   init(data: { project: GameProject; callbacks: GameCallbacks }) {
     this.project = data.project;
@@ -45,6 +54,7 @@ class GameScene extends Phaser.Scene {
     this.ended = false;
     this.actorSprites = new Map();
     this.spriteToActor = new Map();
+    this.touchInput = { left: false, right: false, up: false, down: false, jump: false };
   }
 
   preload() {
@@ -71,22 +81,15 @@ class GameScene extends Phaser.Scene {
       this.spawn(actor);
     }
 
-    // Anything that participates in a "block" collision becomes immovable
-    // so the player can stand on / push against it without shoving it away.
-    const blockTargets = new Set<string>();
+    // Actors with a "block" collide behavior become the static surface
+    // (platforms / walls) — make them immovable and gravity-free so the
+    // player can land on them.
     for (const [, sprite] of this.actorSprites) {
       const actor = this.spriteToActor.get(sprite)!;
-      for (const b of actor.behaviors) {
-        if (b.kind === "collide" && b.effect === "block") {
-          blockTargets.add(b.withTag);
-        }
-      }
-    }
-    for (const [, sprite] of this.actorSprites) {
-      const actor = this.spriteToActor.get(sprite)!;
-      // If something blocks against this actor's tag, make it immovable so
-      // the blocker can rest on top of it.
-      if (this.isBlockedByAny(actor, blockTargets)) {
+      const isBlocker = actor.behaviors.some(
+        (b) => b.kind === "collide" && b.effect === "block"
+      );
+      if (isBlocker) {
         sprite.setImmovable(true);
         const body = sprite.body as Phaser.Physics.Arcade.Body | null;
         if (body) body.setAllowGravity(false);
@@ -131,8 +134,8 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  isBlockedByAny(actor: Actor, blockTargets: Set<string>): boolean {
-    return blockTargets.has(actor.tag);
+  setTouchInput(input: Partial<TouchInput>) {
+    Object.assign(this.touchInput, input);
   }
 
   spawn(actor: Actor) {
@@ -282,20 +285,22 @@ class GameScene extends Phaser.Scene {
         if (b.kind === "controllable") {
           const v = speedToPx(b.speed);
           let vx = 0, vy = 0;
-          if (this.cursors?.left?.isDown) vx = -v;
-          if (this.cursors?.right?.isDown) vx = v;
-          if (this.cursors?.up?.isDown) vy = -v;
-          if (this.cursors?.down?.isDown) vy = v;
+          if (this.cursors?.left?.isDown || this.touchInput.left) vx = -v;
+          if (this.cursors?.right?.isDown || this.touchInput.right) vx = v;
+          if (this.cursors?.up?.isDown || this.touchInput.up) vy = -v;
+          if (this.cursors?.down?.isDown || this.touchInput.down) vy = v;
           sprite.setVelocity(vx, vy);
         }
         if (b.kind === "platformer") {
           const v = speedToPx(b.speed);
           let vx = 0;
-          if (this.cursors?.left?.isDown) vx = -v;
-          if (this.cursors?.right?.isDown) vx = v;
+          if (this.cursors?.left?.isDown || this.touchInput.left) vx = -v;
+          if (this.cursors?.right?.isDown || this.touchInput.right) vx = v;
           sprite.setVelocityX(vx);
           const wantsJump =
-            this.cursors?.up?.isDown || this.cursors?.space?.isDown;
+            this.cursors?.up?.isDown ||
+            this.cursors?.space?.isDown ||
+            this.touchInput.jump;
           const body = sprite.body as Phaser.Physics.Arcade.Body;
           const onGround = body.blocked.down || body.touching.down;
           if (wantsJump && onGround) {
@@ -320,6 +325,7 @@ function speedToPx(speed: 1 | 2 | 3): number {
 
 export type GameHandle = {
   destroy: () => void;
+  setTouch: (input: Partial<TouchInput>) => void;
 };
 
 export function startGame(
@@ -346,6 +352,10 @@ export function startGame(
     game.scene.add("main", GameScene, true, { project, callbacks });
   });
   return {
-    destroy: () => game.destroy(true)
+    destroy: () => game.destroy(true),
+    setTouch: (input) => {
+      const scene = game.scene.getScene("main") as GameScene | undefined;
+      scene?.setTouchInput(input);
+    }
   };
 }
