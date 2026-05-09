@@ -19,6 +19,7 @@ type State = {
   setBackground: (bg: Background) => void;
   addAsset: (asset: Omit<Asset, "id">) => Asset;
   addActor: (assetId: string, x: number, y: number, tag: string) => Actor;
+  copyActor: (id: string) => Actor | null;
   removeActor: (id: string) => void;
   selectActor: (id: string | null) => void;
   updateActor: (id: string, patch: Partial<Actor>) => void;
@@ -82,6 +83,32 @@ export const useProjectStore = create<State>((set) => ({
         : {}
     );
     return actor;
+  },
+
+  copyActor: (id) => {
+    const state = useProjectStore.getState();
+    const project = state.project;
+    if (!project) return null;
+    const src = project.actors.find((a) => a.id === id);
+    if (!src) return null;
+    const offset = 40;
+    const copy: Actor = {
+      ...src,
+      id: uuid(),
+      x: Math.max(40, Math.min(760, src.x + offset)),
+      y: Math.max(40, Math.min(560, src.y + offset)),
+      // Deep clone behaviors so future edits to one don't mutate the other.
+      behaviors: src.behaviors.map((b) => ({ ...b }))
+    };
+    set((s) =>
+      s.project
+        ? {
+            ...patchProject(s, (p) => ({ ...p, actors: [...p.actors, copy] })),
+            selectedActorId: copy.id
+          }
+        : {}
+    );
+    return copy;
   },
 
   removeActor: (id) =>
