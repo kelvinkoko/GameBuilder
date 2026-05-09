@@ -39,7 +39,7 @@ function make(
     category,
     defaultTag,
     dataUrl: svg(
-      `<text x='50' y='72' font-size='80' text-anchor='middle' font-family='Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif'>${emoji}</text>`
+      `<text x='50' y='72' font-size='80' text-anchor='middle' font-family='Apple Color Emoji,Noto Color Emoji,Segoe UI Emoji,sans-serif'>${emoji}</text>`
     )
   };
 }
