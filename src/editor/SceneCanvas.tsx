@@ -38,7 +38,7 @@ export function SceneCanvas() {
       const el = stageRef.current?.parentElement;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const padding = 16;
+      const padding = 4;
       const sx = (rect.width - padding) / STAGE_W;
       const sy = (rect.height - padding) / STAGE_H;
       setScale(Math.min(sx, sy, 1.5));
