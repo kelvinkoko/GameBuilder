@@ -21,16 +21,10 @@ export function Editor({ onPlay, onHome }: Props) {
   const [drawOpen, setDrawOpen] = useState(false);
   const [behaviorOpen, setBehaviorOpen] = useState(false);
 
-  const bg = project?.background;
-  const bgClass =
-    bg && bg.kind === "preset" ? `bg-${bg.value}` : "";
-  const bgStyle =
-    bg && bg.kind === "color" ? { background: bg.value } : undefined;
-
   return (
     <div className="editor">
       <Toolbar onPlay={onPlay} onHome={onHome} />
-      <div className={`stage-wrap ${bgClass}`} style={bgStyle}>
+      <div className="stage-wrap">
         <SceneCanvas />
       </div>
       {selectedActorId && (
