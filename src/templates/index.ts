@@ -104,7 +104,7 @@ export function platformerTemplate(): GameProject {
   // Side-scrolling jump-and-run. Frog hops on bricks toward a crown,
   // avoiding a wandering bug.
   const player = stockAsset("frog", "player");
-  const ground = stockAsset("brick", "wall");
+  const ground = stockAsset("square-brown", "wall");
   const goal = stockAsset("trophy", "treat");
   const enemy = stockAsset("bug", "bug");
 
