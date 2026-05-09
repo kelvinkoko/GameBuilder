@@ -9,6 +9,7 @@ const STAGE_H = 600;
 export type GameCallbacks = {
   onScore: (score: number) => void;
   onEnd: (result: "win" | "lose") => void;
+  onTime?: (secondsLeft: number) => void;
 };
 
 function srcOf(asset: Asset): string {
@@ -46,6 +47,8 @@ class GameScene extends Phaser.Scene {
   private ended = false;
   private pointer: { x: number; y: number } | null = null;
   private touchInput: TouchInput = { left: false, right: false, up: false, down: false, jump: false };
+  private timeRemaining: number | null = null;
+  private lastReportedSeconds = -1;
 
   init(data: { project: GameProject; callbacks: GameCallbacks }) {
     this.project = data.project;
@@ -55,6 +58,9 @@ class GameScene extends Phaser.Scene {
     this.actorSprites = new Map();
     this.spriteToActor = new Map();
     this.touchInput = { left: false, right: false, up: false, down: false, jump: false };
+    const tl = this.project.rules.find((r) => r.kind === "timeLimit");
+    this.timeRemaining = tl && tl.kind === "timeLimit" ? tl.seconds : null;
+    this.lastReportedSeconds = -1;
   }
 
   preload() {
@@ -79,6 +85,10 @@ class GameScene extends Phaser.Scene {
 
     for (const actor of this.project.actors) {
       this.spawn(actor);
+    }
+
+    if (this.timeRemaining !== null) {
+      this.reportTime();
     }
 
     // Actors with a "block" collide behavior become the static surface
@@ -264,6 +274,26 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  reportTime() {
+    if (this.timeRemaining === null) return;
+    const seconds = Math.max(0, Math.ceil(this.timeRemaining));
+    if (seconds !== this.lastReportedSeconds) {
+      this.lastReportedSeconds = seconds;
+      this.callbacks.onTime?.(seconds);
+    }
+  }
+
+  endTimedGame() {
+    // Time ran out. If a score goal exists and wasn't met it's a loss;
+    // otherwise the player survived → win.
+    const goal = this.project.rules.find((r) => r.kind === "scoreToWin");
+    if (goal && goal.kind === "scoreToWin" && this.score < goal.target) {
+      this.endGame("lose");
+    } else {
+      this.endGame("win");
+    }
+  }
+
   endGame(result: "win" | "lose") {
     if (this.ended) return;
     this.ended = true;
@@ -276,6 +306,14 @@ class GameScene extends Phaser.Scene {
   update(_time: number, delta: number) {
     if (this.ended) return;
     const dt = delta / 1000;
+    if (this.timeRemaining !== null) {
+      this.timeRemaining -= dt;
+      this.reportTime();
+      if (this.timeRemaining <= 0) {
+        this.endTimedGame();
+        return;
+      }
+    }
     for (const [, sprite] of this.actorSprites) {
       if (!sprite.active) continue;
       const actor = this.spriteToActor.get(sprite)!;
@@ -316,7 +354,7 @@ class GameScene extends Phaser.Scene {
           const body = sprite.body as Phaser.Physics.Arcade.Body;
           const onGround = body.blocked.down || body.touching.down;
           if (wantsJump && onGround) {
-            const jv = b.jump === 1 ? 320 : b.jump === 2 ? 460 : 600;
+            const jv = b.jump === 1 ? 380 : b.jump === 2 ? 560 : 720;
             sprite.setVelocityY(-jv);
           }
         }

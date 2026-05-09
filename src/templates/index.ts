@@ -130,7 +130,7 @@ export function platformerTemplate(): GameProject {
     assets: [player, ground, goal, enemy],
     actors: [
       placeActor(player, 80, 480, [
-        { kind: "platformer", speed: 2, jump: 2 }
+        { kind: "platformer", speed: 2, jump: 3 }
       ]),
       ...platforms,
       placeActor(enemy, 380, 520, [
