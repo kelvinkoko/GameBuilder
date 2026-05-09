@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BigButton } from "../ui/BigButton";
 import { useProjectStore } from "../state/projectStore";
 import { startGame, type GameHandle } from "../runtime/PhaserGame";
+import { TouchControls } from "../runtime/TouchControls";
 
 type Props = {
   onBack: () => void;
@@ -91,6 +92,22 @@ export function Play({ onBack }: Props) {
     };
   }, [onBack]);
 
+  const controls = useMemo(() => {
+    if (!project) return { dpad: false, jump: false };
+    let dpad = false;
+    let jump = false;
+    for (const a of project.actors) {
+      for (const b of a.behaviors) {
+        if (b.kind === "controllable") dpad = true;
+        if (b.kind === "platformer") {
+          dpad = true;
+          jump = true;
+        }
+      }
+    }
+    return { dpad, jump };
+  }, [project]);
+
   if (!project) return null;
 
   return (
@@ -105,7 +122,17 @@ export function Play({ onBack }: Props) {
           onClick={() => setTick((t) => t + 1)}
         />
       </div>
-      <div ref={hostRef} className="game-host" />
+      <div ref={hostRef} className="game-host">
+        {(controls.dpad || controls.jump) && (
+          <TouchControls
+            showDpad={controls.dpad}
+            showJump={controls.jump}
+            onChange={(key, down) => {
+              handleRef.current?.setTouch({ [key]: down });
+            }}
+          />
+        )}
+      </div>
       {end && (
         <div className="endcard">
           <span className="big-emoji">{end === "win" ? "🏆" : "😿"}</span>
