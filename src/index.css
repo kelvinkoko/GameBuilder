@@ -74,6 +74,7 @@ img { -webkit-user-drag: none; user-select: none; }
 }
 .bigbtn:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0,0,0,0.12); }
 .bigbtn .ico { font-size: 28px; line-height: 1; }
+.bigbtn .label { white-space: nowrap; }
 .bigbtn.accent { background: var(--accent); color: white; }
 .bigbtn.good { background: var(--good); color: #064430; }
 .bigbtn.info { background: var(--info); color: white; }
@@ -522,3 +523,24 @@ img { -webkit-user-drag: none; user-select: none; }
 .spacer { flex: 1; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
+
+/* Small screens: collapse text labels on toolbar/tray buttons so the
+   icons stay readable and the row stops overflowing. Modals keep
+   their text since they have their own width budget. */
+@media (max-width: 720px) {
+  .toolrow .bigbtn .label,
+  .tray .bigbtn .label {
+    display: none;
+  }
+  .toolrow .bigbtn,
+  .tray .bigbtn {
+    padding: 10px;
+    min-width: var(--tap);
+  }
+  .game-name-btn {
+    font-size: 16px;
+    padding: 6px 10px;
+    max-width: 40vw;
+  }
+  .topbar h1 { font-size: 18px; }
+}
