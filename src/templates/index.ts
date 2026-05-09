@@ -54,9 +54,9 @@ export function mazeTemplate(): GameProject {
     "WWWWWWWWWW"
   ];
 
-  const player = stockAsset("frog", "player");
+  const player = stockAsset("mouse", "player");
   const wall = stockAsset("brick", "wall");
-  const goal = stockAsset("crown", "treat");
+  const goal = stockAsset("cheese", "treat");
   const wallBehavior = [
     { kind: "collide" as const, withTag: "player", effect: "block" as const }
   ];
