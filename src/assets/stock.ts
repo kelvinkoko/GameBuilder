@@ -312,6 +312,7 @@ const SYMBOLS: [string, string, string, Tag][] = [
   ["square-blue", "Blue square", "🟦", "wall"],
   ["square-green", "Green square", "🟩", "wall"],
   ["square-yellow", "Yellow square", "🟨", "wall"],
+  ["square-brown", "Brown square", "🟫", "wall"],
   ["arrow-up", "Arrow up", "⬆️", "treat"],
   ["arrow-down", "Arrow down", "⬇️", "treat"],
   ["arrow-left", "Arrow left", "⬅️", "treat"],
