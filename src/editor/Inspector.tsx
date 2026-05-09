@@ -49,6 +49,7 @@ export function Inspector({ onAddBehavior }: { onAddBehavior: () => void }) {
   const id = useProjectStore((s) => s.selectedActorId);
   const removeBehavior = useProjectStore((s) => s.removeBehavior);
   const removeActor = useProjectStore((s) => s.removeActor);
+  const copyActor = useProjectStore((s) => s.copyActor);
   const updateActor = useProjectStore((s) => s.updateActor);
   const [tagOpen, setTagOpen] = useState(false);
 
@@ -78,6 +79,13 @@ export function Inspector({ onAddBehavior }: { onAddBehavior: () => void }) {
           iconOnly
           title="Smaller"
           onClick={() => updateActor(actor.id, { scale: Math.max(0.4, actor.scale - 0.2) })}
+        />
+        <BigButton
+          icon="➕"
+          variant="good"
+          iconOnly
+          title="Copy"
+          onClick={() => copyActor(actor.id)}
         />
         <BigButton
           icon="🗑️"
