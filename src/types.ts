@@ -47,7 +47,7 @@ export type Background =
 export type GameProject = {
   id: string;
   name: string;
-  template: "blank" | "maze" | "catch" | "platformer" | "aquarium";
+  template: "blank" | "maze" | "catch" | "platformer" | "aquarium" | "whackamole";
   background: Background;
   assets: Asset[];
   actors: Actor[];
