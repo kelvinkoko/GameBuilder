@@ -373,6 +373,12 @@ class GameScene extends Phaser.Scene {
         sprite.x = Phaser.Math.Between(60, STAGE_W - 60);
         if (!sprite.active) sprite.enableBody(true, sprite.x, sprite.y, true, true);
       }
+      // Recycle off-screen "up"-movers (bubbles in the aquarium etc.).
+      if (sprite.y < -60 && actor.behaviors.some((bb) => bb.kind === "move" && bb.dir === "up")) {
+        sprite.y = STAGE_H + 40;
+        sprite.x = Phaser.Math.Between(60, STAGE_W - 60);
+        if (!sprite.active) sprite.enableBody(true, sprite.x, sprite.y, true, true);
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
-import type { Asset, Actor, GameProject } from "../types";
+import type { Asset, Actor, GameProject, Behavior } from "../types";
 import { findStock, STOCK_STICKERS } from "../assets/stock";
+import { SKETCHES } from "../assets/sketches";
 
 function stockAsset(stockId: string, tag: string): Asset {
   const stock = findStock(stockId)!;
@@ -148,8 +149,89 @@ export function platformerTemplate(): GameProject {
   };
 }
 
+export function aquariumTemplate(): GameProject {
+  // Sandbox / pet mode: no win, no lose. Pre-populated with hand-drawn
+  // sketch creatures so the kid sees that drawn sprites belong here too.
+  function sketchAsset(id: string): Asset {
+    const s = SKETCHES.find((k) => k.id === id)!;
+    return {
+      id: uuid(),
+      name: s.name,
+      source: { kind: "drawn", dataUrl: s.dataUrl },
+      tag: "player"
+    };
+  }
+
+  const fishOrange = sketchAsset("sk-fish-orange");
+  const fishPink = sketchAsset("sk-fish-pink");
+  const fishBlue = sketchAsset("sk-fish-blue");
+  const starfish = sketchAsset("sk-starfish");
+  const crab = sketchAsset("sk-crab");
+  const seaweed = { ...sketchAsset("sk-seaweed"), tag: "wall" };
+  const bubble = { ...sketchAsset("sk-bubble"), tag: "treat" };
+
+  const swim: Behavior[] = [
+    { kind: "move", dir: "wander", speed: 1 },
+    { kind: "bounce" },
+    { kind: "onTap", action: "sound" }
+  ];
+  const float: Behavior[] = [
+    { kind: "move", dir: "up", speed: 1 },
+    { kind: "onTap", action: "sound" }
+  ];
+
+  function place(asset: Asset, x: number, y: number, scale: number, behaviors: Behavior[]): Actor {
+    return {
+      id: uuid(),
+      assetId: asset.id,
+      tag: asset.tag ?? "player",
+      x,
+      y,
+      scale,
+      rotation: 0,
+      behaviors
+    };
+  }
+
+  return {
+    id: uuid(),
+    name: "Aquarium",
+    template: "aquarium",
+    background: { kind: "preset", value: "sea" },
+    assets: [fishOrange, fishPink, fishBlue, starfish, crab, seaweed, bubble],
+    actors: [
+      // Decorative seaweed first so it draws behind the swimmers.
+      place(seaweed, 100, 480, 1.2, []),
+      place(seaweed, 700, 470, 1, []),
+      // Fish wandering around the middle.
+      place(fishOrange, 200, 200, 1.1, swim),
+      place(fishPink, 540, 280, 1, swim),
+      place(fishBlue, 360, 380, 0.9, swim),
+      place(fishOrange, 620, 160, 0.8, swim),
+      // Sea floor friends.
+      place(crab, 320, 520, 1, [
+        { kind: "move", dir: "wander", speed: 1 },
+        { kind: "bounce" },
+        { kind: "onTap", action: "sound" }
+      ]),
+      place(starfish, 460, 530, 0.9, [
+        { kind: "spin", speed: 1 },
+        { kind: "onTap", action: "grow" }
+      ]),
+      // A few rising bubbles.
+      place(bubble, 150, 540, 0.6, float),
+      place(bubble, 420, 560, 0.5, float),
+      place(bubble, 680, 560, 0.7, float)
+    ],
+    rules: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+}
+
 export const TEMPLATES = [
   { id: "blank", name: "Blank", emoji: "🎨", build: blankTemplate },
+  { id: "aquarium", name: "Aquarium", emoji: "🐠", build: aquariumTemplate },
   { id: "maze", name: "Maze", emoji: "🧩", build: mazeTemplate },
   { id: "platformer", name: "Jump & run", emoji: "🦘", build: platformerTemplate }
 ];
