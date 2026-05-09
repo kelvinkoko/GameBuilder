@@ -1,0 +1,293 @@
+import Phaser from "phaser";
+import type { Actor, Asset, GameProject } from "../types";
+import { findStock } from "../assets/stock";
+import { sounds } from "../audio/sounds";
+
+const STAGE_W = 800;
+const STAGE_H = 600;
+
+export type GameCallbacks = {
+  onScore: (score: number) => void;
+  onEnd: (result: "win" | "lose") => void;
+};
+
+function srcOf(asset: Asset): string {
+  if (asset.source.kind === "stock") return findStock(asset.source.stockId)?.dataUrl ?? "";
+  return asset.source.dataUrl;
+}
+
+function bgColor(project: GameProject): number {
+  if (project.background.kind === "color") {
+    return Phaser.Display.Color.HexStringToColor(project.background.value).color;
+  }
+  switch (project.background.value) {
+    case "sky": return 0xbde0fe;
+    case "grass": return 0xcaffbf;
+    case "sea": return 0x90e0ef;
+    case "space": return 0x07071a;
+  }
+}
+
+class GameScene extends Phaser.Scene {
+  private project!: GameProject;
+  private callbacks!: GameCallbacks;
+  private actorSprites: Map<string, Phaser.Physics.Arcade.Sprite> = new Map();
+  private spriteToActor: Map<Phaser.Physics.Arcade.Sprite, Actor> = new Map();
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private score = 0;
+  private ended = false;
+  private pointer: { x: number; y: number } | null = null;
+
+  init(data: { project: GameProject; callbacks: GameCallbacks }) {
+    this.project = data.project;
+    this.callbacks = data.callbacks;
+    this.score = 0;
+    this.ended = false;
+    this.actorSprites = new Map();
+    this.spriteToActor = new Map();
+  }
+
+  preload() {
+    for (const asset of this.project.assets) {
+      this.load.image(asset.id, srcOf(asset));
+    }
+  }
+
+  create() {
+    this.cameras.main.setBackgroundColor(bgColor(this.project));
+    this.physics.world.setBounds(0, 0, STAGE_W, STAGE_H);
+    if (this.input.keyboard) {
+      this.cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    this.input.on("pointermove", (p: Phaser.Input.Pointer) => {
+      this.pointer = { x: p.worldX, y: p.worldY };
+    });
+    this.input.on("pointerdown", (p: Phaser.Input.Pointer) => {
+      this.pointer = { x: p.worldX, y: p.worldY };
+    });
+
+    for (const actor of this.project.actors) {
+      this.spawn(actor);
+    }
+
+    // Set up overlaps for collide behaviors.
+    for (const [, sprite] of this.actorSprites) {
+      const actor = this.spriteToActor.get(sprite)!;
+      for (const b of actor.behaviors) {
+        if (b.kind !== "collide") continue;
+        // Find target sprites with the matching tag.
+        for (const [, other] of this.actorSprites) {
+          const otherActor = this.spriteToActor.get(other);
+          if (!otherActor || otherActor.id === actor.id) continue;
+          if (otherActor.tag !== b.withTag) continue;
+          this.physics.add.overlap(sprite, other, () => {
+            this.handleCollide(sprite, other, b.effect);
+          });
+        }
+      }
+    }
+
+    // World-bounds collision for bouncing/controllable actors.
+    for (const [, sprite] of this.actorSprites) {
+      const actor = this.spriteToActor.get(sprite)!;
+      const bounce = actor.behaviors.some((b) => b.kind === "bounce");
+      const controllable = actor.behaviors.some((b) => b.kind === "controllable");
+      if (bounce) {
+        sprite.setCollideWorldBounds(true);
+        sprite.setBounce(1, 1);
+      } else if (controllable) {
+        sprite.setCollideWorldBounds(true);
+      } else {
+        // Loose actors: gently wrap or kill at the bottom for falling pieces.
+        sprite.setCollideWorldBounds(false);
+      }
+    }
+  }
+
+  spawn(actor: Actor) {
+    const sprite = this.physics.add.sprite(actor.x, actor.y, actor.assetId);
+    // Normalize sprite size — emoji SVGs come in various intrinsic sizes.
+    const target = 80;
+    const w = sprite.width || target;
+    const h = sprite.height || target;
+    const baseScale = target / Math.max(w, h);
+    sprite.setScale(baseScale * actor.scale);
+    sprite.setRotation(Phaser.Math.DegToRad(actor.rotation));
+    sprite.setDataEnabled();
+    sprite.setData("baseScale", baseScale);
+    sprite.setData("actor", actor);
+    sprite.setInteractive({ useHandCursor: true });
+    this.actorSprites.set(actor.id, sprite);
+    this.spriteToActor.set(sprite, actor);
+
+    sprite.on("pointerdown", () => {
+      for (const b of actor.behaviors) {
+        if (b.kind !== "onTap") continue;
+        this.handleTap(sprite, b.action);
+      }
+    });
+
+    if (actor.behaviors.some((b) => b.kind === "gravity")) {
+      sprite.setGravityY(800);
+    }
+
+    // Initial velocity from move behavior.
+    for (const b of actor.behaviors) {
+      if (b.kind !== "move") continue;
+      const v = speedToPx(b.speed);
+      switch (b.dir) {
+        case "left": sprite.setVelocityX(-v); break;
+        case "right": sprite.setVelocityX(v); break;
+        case "up": sprite.setVelocityY(-v); break;
+        case "down": sprite.setVelocityY(v); break;
+        case "wander":
+          sprite.setVelocity(
+            (Math.random() * 2 - 1) * v,
+            (Math.random() * 2 - 1) * v
+          );
+          break;
+        case "follow":
+          // Velocity set per-frame in update.
+          break;
+      }
+    }
+  }
+
+  handleTap(sprite: Phaser.Physics.Arcade.Sprite, action: "sound" | "vanish" | "grow" | "shrink") {
+    switch (action) {
+      case "sound":
+        sounds.boop();
+        break;
+      case "vanish":
+        sounds.whoosh();
+        sprite.disableBody(true, true);
+        break;
+      case "grow":
+        sounds.ding();
+        sprite.setScale(Math.min(sprite.scale * 1.25, sprite.getData("baseScale") * 4));
+        break;
+      case "shrink":
+        sounds.ding();
+        sprite.setScale(Math.max(sprite.scale * 0.8, sprite.getData("baseScale") * 0.25));
+        break;
+    }
+  }
+
+  handleCollide(self: Phaser.Physics.Arcade.Sprite, other: Phaser.Physics.Arcade.Sprite, effect: "score" | "vanish" | "win" | "lose" | "sound") {
+    if (this.ended) return;
+    if (!self.active || !other.active) return;
+    switch (effect) {
+      case "sound":
+        sounds.ding();
+        break;
+      case "vanish":
+        sounds.whoosh();
+        self.disableBody(true, true);
+        break;
+      case "score": {
+        sounds.ding();
+        // The "self" actor is the one that scored — typically a treat hit by the player.
+        self.disableBody(true, true);
+        this.score += 1;
+        this.callbacks.onScore(this.score);
+        const target = this.project.rules.find((r) => r.kind === "scoreToWin");
+        if (target && target.kind === "scoreToWin" && this.score >= target.target) {
+          this.endGame("win");
+        }
+        break;
+      }
+      case "win":
+        this.endGame("win");
+        break;
+      case "lose":
+        this.endGame("lose");
+        break;
+    }
+  }
+
+  endGame(result: "win" | "lose") {
+    if (this.ended) return;
+    this.ended = true;
+    if (result === "win") sounds.yay();
+    else sounds.buzz();
+    this.physics.pause();
+    this.callbacks.onEnd(result);
+  }
+
+  update(_time: number, delta: number) {
+    if (this.ended) return;
+    const dt = delta / 1000;
+    for (const [, sprite] of this.actorSprites) {
+      if (!sprite.active) continue;
+      const actor = this.spriteToActor.get(sprite)!;
+      for (const b of actor.behaviors) {
+        if (b.kind === "spin") {
+          sprite.rotation += b.speed * 2 * dt;
+        }
+        if (b.kind === "move" && b.dir === "follow" && this.pointer) {
+          const dx = this.pointer.x - sprite.x;
+          const dy = this.pointer.y - sprite.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 4) {
+            const v = speedToPx(b.speed);
+            sprite.setVelocity((dx / dist) * v, (dy / dist) * v);
+          } else {
+            sprite.setVelocity(0, 0);
+          }
+        }
+        if (b.kind === "controllable") {
+          const v = speedToPx(b.speed);
+          let vx = 0, vy = 0;
+          if (this.cursors?.left?.isDown) vx = -v;
+          if (this.cursors?.right?.isDown) vx = v;
+          if (this.cursors?.up?.isDown) vy = -v;
+          if (this.cursors?.down?.isDown) vy = v;
+          sprite.setVelocity(vx, vy);
+        }
+      }
+      // Recycle off-screen "down"-mover treats so the catch game keeps going.
+      if (sprite.y > STAGE_H + 60 && actor.behaviors.some((bb) => bb.kind === "move" && bb.dir === "down")) {
+        sprite.y = -40;
+        sprite.x = Phaser.Math.Between(60, STAGE_W - 60);
+        if (!sprite.active) sprite.enableBody(true, sprite.x, sprite.y, true, true);
+      }
+    }
+  }
+}
+
+function speedToPx(speed: 1 | 2 | 3): number {
+  return speed === 1 ? 80 : speed === 2 ? 160 : 280;
+}
+
+export type GameHandle = {
+  destroy: () => void;
+};
+
+export function startGame(
+  parent: HTMLElement,
+  project: GameProject,
+  callbacks: GameCallbacks
+): GameHandle {
+  const game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent,
+    width: STAGE_W,
+    height: STAGE_H,
+    backgroundColor: "#000",
+    physics: {
+      default: "arcade",
+      arcade: { gravity: { x: 0, y: 0 }, debug: false }
+    },
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH
+    }
+  });
+  game.events.once(Phaser.Core.Events.READY, () => {
+    game.scene.add("main", GameScene, true, { project, callbacks });
+  });
+  return {
+    destroy: () => game.destroy(true)
+  };
+}
