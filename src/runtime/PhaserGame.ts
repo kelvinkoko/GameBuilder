@@ -71,38 +71,68 @@ class GameScene extends Phaser.Scene {
       this.spawn(actor);
     }
 
-    // Set up overlaps for collide behaviors.
+    // Anything that participates in a "block" collision becomes immovable
+    // so the player can stand on / push against it without shoving it away.
+    const blockTargets = new Set<string>();
+    for (const [, sprite] of this.actorSprites) {
+      const actor = this.spriteToActor.get(sprite)!;
+      for (const b of actor.behaviors) {
+        if (b.kind === "collide" && b.effect === "block") {
+          blockTargets.add(b.withTag);
+        }
+      }
+    }
+    for (const [, sprite] of this.actorSprites) {
+      const actor = this.spriteToActor.get(sprite)!;
+      // If something blocks against this actor's tag, make it immovable so
+      // the blocker can rest on top of it.
+      if (this.isBlockedByAny(actor, blockTargets)) {
+        sprite.setImmovable(true);
+        const body = sprite.body as Phaser.Physics.Arcade.Body | null;
+        if (body) body.setAllowGravity(false);
+      }
+    }
+
+    // Set up overlaps / colliders for collide behaviors.
     for (const [, sprite] of this.actorSprites) {
       const actor = this.spriteToActor.get(sprite)!;
       for (const b of actor.behaviors) {
         if (b.kind !== "collide") continue;
-        // Find target sprites with the matching tag.
         for (const [, other] of this.actorSprites) {
           const otherActor = this.spriteToActor.get(other);
           if (!otherActor || otherActor.id === actor.id) continue;
           if (otherActor.tag !== b.withTag) continue;
-          this.physics.add.overlap(sprite, other, () => {
-            this.handleCollide(sprite, other, b.effect);
-          });
+          if (b.effect === "block") {
+            this.physics.add.collider(sprite, other);
+          } else {
+            this.physics.add.overlap(sprite, other, () => {
+              this.handleCollide(sprite, other, b.effect);
+            });
+          }
         }
       }
     }
 
-    // World-bounds collision for bouncing/controllable actors.
+    // World-bounds collision for bouncing/controllable/platformer actors.
     for (const [, sprite] of this.actorSprites) {
       const actor = this.spriteToActor.get(sprite)!;
       const bounce = actor.behaviors.some((b) => b.kind === "bounce");
-      const controllable = actor.behaviors.some((b) => b.kind === "controllable");
+      const controllable = actor.behaviors.some(
+        (b) => b.kind === "controllable" || b.kind === "platformer"
+      );
       if (bounce) {
         sprite.setCollideWorldBounds(true);
         sprite.setBounce(1, 1);
       } else if (controllable) {
         sprite.setCollideWorldBounds(true);
       } else {
-        // Loose actors: gently wrap or kill at the bottom for falling pieces.
         sprite.setCollideWorldBounds(false);
       }
     }
+  }
+
+  isBlockedByAny(actor: Actor, blockTargets: Set<string>): boolean {
+    return blockTargets.has(actor.tag);
   }
 
   spawn(actor: Actor) {
@@ -118,6 +148,13 @@ class GameScene extends Phaser.Scene {
     sprite.setData("baseScale", baseScale);
     sprite.setData("actor", actor);
     sprite.setInteractive({ useHandCursor: true });
+    // Tighter hitbox than the visual so kids don't lose to "almost" touches.
+    // Body size is in texture-pixels; arcade scales it with the sprite.
+    const hitFrac = 0.65;
+    const bw = w * hitFrac;
+    const bh = h * hitFrac;
+    sprite.body.setSize(bw, bh);
+    sprite.body.setOffset((w - bw) / 2, (h - bh) / 2);
     this.actorSprites.set(actor.id, sprite);
     this.spriteToActor.set(sprite, actor);
 
@@ -128,8 +165,11 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    if (actor.behaviors.some((b) => b.kind === "gravity")) {
-      sprite.setGravityY(800);
+    if (
+      actor.behaviors.some((b) => b.kind === "gravity") ||
+      actor.behaviors.some((b) => b.kind === "platformer")
+    ) {
+      sprite.setGravityY(900);
     }
 
     // Initial velocity from move behavior.
@@ -174,10 +214,13 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  handleCollide(self: Phaser.Physics.Arcade.Sprite, other: Phaser.Physics.Arcade.Sprite, effect: "score" | "vanish" | "win" | "lose" | "sound") {
+  handleCollide(self: Phaser.Physics.Arcade.Sprite, other: Phaser.Physics.Arcade.Sprite, effect: "score" | "vanish" | "win" | "lose" | "sound" | "block") {
     if (this.ended) return;
     if (!self.active || !other.active) return;
     switch (effect) {
+      case "block":
+        // Handled via add.collider during scene setup; nothing to do here.
+        return;
       case "sound":
         sounds.ding();
         break;
@@ -244,6 +287,21 @@ class GameScene extends Phaser.Scene {
           if (this.cursors?.up?.isDown) vy = -v;
           if (this.cursors?.down?.isDown) vy = v;
           sprite.setVelocity(vx, vy);
+        }
+        if (b.kind === "platformer") {
+          const v = speedToPx(b.speed);
+          let vx = 0;
+          if (this.cursors?.left?.isDown) vx = -v;
+          if (this.cursors?.right?.isDown) vx = v;
+          sprite.setVelocityX(vx);
+          const wantsJump =
+            this.cursors?.up?.isDown || this.cursors?.space?.isDown;
+          const body = sprite.body as Phaser.Physics.Arcade.Body;
+          const onGround = body.blocked.down || body.touching.down;
+          if (wantsJump && onGround) {
+            const jv = b.jump === 1 ? 320 : b.jump === 2 ? 460 : 600;
+            sprite.setVelocityY(-jv);
+          }
         }
       }
       // Recycle off-screen "down"-mover treats so the catch game keeps going.

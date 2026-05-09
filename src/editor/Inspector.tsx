@@ -20,6 +20,7 @@ function describe(b: Behavior): { ico: string; name: string } {
     case "bounce": return { ico: "↔️", name: "Bounce" };
     case "spin": return { ico: "🔁", name: "Spin" };
     case "controllable": return { ico: "🎮", name: "Arrows" };
+    case "platformer": return { ico: "🦘", name: "Run & jump" };
     case "gravity": return { ico: "🪨", name: "Falls" };
     case "onTap":
       switch (b.action) {
@@ -31,7 +32,12 @@ function describe(b: Behavior): { ico: string; name: string } {
       break;
     case "collide":
       return {
-        ico: b.effect === "win" ? "🏆" : b.effect === "lose" ? "💔" : b.effect === "score" ? "⭐" : b.effect === "vanish" ? "💥" : "🔊",
+        ico:
+          b.effect === "win" ? "🏆" :
+          b.effect === "lose" ? "💔" :
+          b.effect === "score" ? "⭐" :
+          b.effect === "vanish" ? "💥" :
+          b.effect === "block" ? "🧱" : "🔊",
         name: `${b.effect} on ${b.withTag}`
       };
   }

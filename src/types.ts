@@ -13,7 +13,7 @@ export type MoveDir = "left" | "right" | "up" | "down" | "follow" | "wander";
 export type Speed = 1 | 2 | 3;
 
 export type TapAction = "sound" | "vanish" | "grow" | "shrink";
-export type CollideEffect = "score" | "vanish" | "win" | "lose" | "sound";
+export type CollideEffect = "score" | "vanish" | "win" | "lose" | "sound" | "block";
 
 export type Behavior =
   | { kind: "move"; dir: MoveDir; speed: Speed }
@@ -22,6 +22,7 @@ export type Behavior =
   | { kind: "onTap"; action: TapAction }
   | { kind: "collide"; withTag: string; effect: CollideEffect }
   | { kind: "controllable"; speed: Speed }
+  | { kind: "platformer"; speed: Speed; jump: Speed }
   | { kind: "gravity" };
 
 export type Actor = {
@@ -46,7 +47,7 @@ export type Background =
 export type GameProject = {
   id: string;
   name: string;
-  template: "blank" | "maze" | "catch";
+  template: "blank" | "maze" | "catch" | "platformer";
   background: Background;
   assets: Asset[];
   actors: Actor[];

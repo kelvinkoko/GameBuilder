@@ -1,6 +1,6 @@
 import { Modal } from "../ui/Modal";
 import { BigButton } from "../ui/BigButton";
-import type { Behavior } from "../types";
+import type { Behavior, CollideEffect } from "../types";
 import { TAG_OPTIONS } from "../types";
 import { useState } from "react";
 
@@ -27,6 +27,7 @@ const CARDS: Card[] = [
   { key: "bounce", ico: "↔️", name: "Bounce", build: () => ({ kind: "bounce" }) },
   { key: "spin", ico: "🔁", name: "Spin", build: () => ({ kind: "spin", speed: 2 }) },
   { key: "controllable", ico: "🎮", name: "Arrow keys", build: () => ({ kind: "controllable", speed: 2 }) },
+  { key: "platformer", ico: "🦘", name: "Run & jump", build: () => ({ kind: "platformer", speed: 2, jump: 2 }) },
   { key: "gravity", ico: "🪨", name: "Falls", build: () => ({ kind: "gravity" }) },
   { key: "tap-sound", ico: "🔊", name: "Tap: sound", build: () => ({ kind: "onTap", action: "sound" }) },
   { key: "tap-vanish", ico: "💨", name: "Tap: gone", build: () => ({ kind: "onTap", action: "vanish" }) },
@@ -36,7 +37,7 @@ const CARDS: Card[] = [
 
 export function BehaviorPicker({ open, onClose, onAdd }: Props) {
   const [collidePicker, setCollidePicker] = useState<null | {
-    effect: "score" | "vanish" | "win" | "lose" | "sound";
+    effect: CollideEffect;
     label: string;
     ico: string;
   }>(null);
@@ -85,6 +86,13 @@ export function BehaviorPicker({ open, onClose, onAdd }: Props) {
         >
           <span className="ico">💥</span>
           <span className="name">Touch: gone</span>
+        </button>
+        <button
+          className="behavior-card"
+          onClick={() => setCollidePicker({ effect: "block", label: "Touch: block", ico: "🧱" })}
+        >
+          <span className="ico">🧱</span>
+          <span className="name">Stop them</span>
         </button>
       </div>
       <div className="modal-actions">
