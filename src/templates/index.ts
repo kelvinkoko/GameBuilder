@@ -105,7 +105,7 @@ export function platformerTemplate(): GameProject {
   // avoiding a wandering bug.
   const player = stockAsset("frog", "player");
   const ground = stockAsset("brick", "wall");
-  const goal = stockAsset("crown", "treat");
+  const goal = stockAsset("trophy", "treat");
   const enemy = stockAsset("bug", "bug");
 
   const blockOnPlayer = [
@@ -229,10 +229,43 @@ export function aquariumTemplate(): GameProject {
   };
 }
 
+export function whackTemplate(): GameProject {
+  // Many wandering moles bounce around the stage; tap to score.
+  // Score-to-win + time-limit make it a satisfying skill challenge.
+  const mole = stockAsset("hamster", "bug");
+  const positions: [number, number][] = [
+    [120, 130], [320, 130], [520, 130], [680, 130],
+    [120, 300], [320, 300], [520, 300], [680, 300],
+    [220, 470], [420, 470], [620, 470]
+  ];
+  const moles = positions.map(([x, y]) =>
+    placeActor(mole, x, y, [
+      { kind: "move", dir: "wander", speed: 1 },
+      { kind: "bounce" },
+      { kind: "onTap", action: "score" }
+    ])
+  );
+  return {
+    id: uuid(),
+    name: "Whack-a-mole",
+    template: "whackamole",
+    background: { kind: "preset", value: "grass" },
+    assets: [mole],
+    actors: moles,
+    rules: [
+      { kind: "scoreToWin", target: 8 },
+      { kind: "timeLimit", seconds: 30 }
+    ],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+}
+
 export const TEMPLATES = [
   { id: "maze", name: "Maze", emoji: "🧩", build: mazeTemplate },
   { id: "platformer", name: "Jump & run", emoji: "🦘", build: platformerTemplate },
   { id: "aquarium", name: "Aquarium", emoji: "🐠", build: aquariumTemplate },
+  { id: "whackamole", name: "Whack-a-mole", emoji: "🐹", build: whackTemplate },
   { id: "blank", name: "Blank", emoji: "🎨", build: blankTemplate }
 ];
 
