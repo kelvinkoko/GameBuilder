@@ -353,10 +353,18 @@ class GameScene extends Phaser.Scene {
             this.touchInput.jump;
           const body = sprite.body as Phaser.Physics.Arcade.Body;
           const onGround = body.blocked.down || body.touching.down;
-          if (wantsJump && onGround) {
-            const jv = b.jump === 1 ? 380 : b.jump === 2 ? 560 : 720;
+          const wasHeld = sprite.getData("jumpHeld") === true;
+          // Rising edge of the jump key while standing on something: launch.
+          if (wantsJump && !wasHeld && onGround) {
+            const jv = b.jump === 1 ? 320 : b.jump === 2 ? 460 : 590;
             sprite.setVelocityY(-jv);
           }
+          // Falling edge while still rising: cut the upward velocity so a
+          // short tap = small hop, a long hold = full jump (gravity caps it).
+          if (!wantsJump && wasHeld && body.velocity.y < 0) {
+            sprite.setVelocityY(body.velocity.y * 0.5);
+          }
+          sprite.setData("jumpHeld", wantsJump);
         }
       }
       // Recycle off-screen "down"-mover treats so the catch game keeps going.
