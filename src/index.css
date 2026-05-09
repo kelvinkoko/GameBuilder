@@ -387,6 +387,40 @@ img { -webkit-user-drag: none; user-select: none; }
 .endcard .big-emoji { font-size: 88px; }
 .endcard h1 { font-size: 36px; margin: 0; }
 
+.game-name-btn {
+  background: transparent;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.game-name-btn:hover { background: rgba(0, 0, 0, 0.05); }
+.game-name-btn:active { background: rgba(0, 0, 0, 0.1); }
+
+.rename-input {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  padding: 14px 16px;
+  border: 3px solid var(--primary);
+  border-radius: 14px;
+  background: white;
+  color: var(--ink);
+  width: min(360px, 80vw);
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.rename-input:focus { border-color: var(--accent); }
+
 .picker-tabs {
   display: flex;
   gap: 4px;
