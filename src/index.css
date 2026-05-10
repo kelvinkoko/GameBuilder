@@ -525,31 +525,6 @@ img { -webkit-user-drag: none; user-select: none; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
 
-/* Floating button on the stage that hides/shows the toolbar + tray
-   so the canvas can fill the screen during placement. */
-.chrome-toggle {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--ink);
-  font-size: 18px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-  z-index: 10;
-}
-.editor.chrome-hidden .toolrow,
-.editor.chrome-hidden .tray,
-.editor.chrome-hidden .inspector {
-  display: none;
-}
-
 
 /* Small screens: collapse text labels and tighten chrome so the canvas
    gets the most room. Modals keep their text since they have their
@@ -594,13 +569,6 @@ img { -webkit-user-drag: none; user-select: none; }
     width: 100%;
     height: calc(100vw * 3 / 4);
     aspect-ratio: 4 / 3;
-  }
-  /* When chrome is hidden, give the stage the full viewport again
-     and let the regular fit math (min of sx, sy) take over. */
-  .editor.chrome-hidden .stage-wrap {
-    flex: 1 1 auto;
-    height: auto;
-    aspect-ratio: auto;
   }
 }
 

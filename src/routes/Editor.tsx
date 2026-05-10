@@ -6,7 +6,6 @@ import { AssetTray, StockPicker } from "../editor/AssetTray";
 import { DrawingPad } from "../editor/DrawingPad";
 import { BehaviorPicker } from "../editor/BehaviorPicker";
 import { Inspector } from "../editor/Inspector";
-import { sounds } from "../audio/sounds";
 
 type Props = {
   onPlay: () => void;
@@ -21,26 +20,14 @@ export function Editor({ onPlay, onHome }: Props) {
   const [stockOpen, setStockOpen] = useState(false);
   const [drawOpen, setDrawOpen] = useState(false);
   const [behaviorOpen, setBehaviorOpen] = useState(false);
-  const [chromeHidden, setChromeHidden] = useState(false);
 
   return (
-    <div className={`editor ${chromeHidden ? "chrome-hidden" : ""}`}>
+    <div className="editor">
       <Toolbar onPlay={onPlay} onHome={onHome} />
       <div className="stage-wrap">
         <SceneCanvas />
-        <button
-          className="chrome-toggle"
-          aria-label={chromeHidden ? "Show buttons" : "Hide buttons"}
-          title={chromeHidden ? "Show buttons" : "Hide buttons"}
-          onClick={() => {
-            sounds.pop();
-            setChromeHidden((v) => !v);
-          }}
-        >
-          {chromeHidden ? "▾" : "▴"}
-        </button>
       </div>
-      {selectedActorId && !chromeHidden && (
+      {selectedActorId && (
         <Inspector onAddBehavior={() => setBehaviorOpen(true)} />
       )}
       <AssetTray
