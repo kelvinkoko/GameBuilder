@@ -32,31 +32,50 @@ export function SceneCanvas() {
   const stageRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
-  // Fit the 800x600 stage into the available space.
-  // When the viewport is taller than 4:3, force the wrap to a 4:3 box
-  // at full viewport width (no padding, full bleed) so the canvas
-  // takes every horizontal pixel and the height matches at 4:3.
-  // CSS-only attempts at this were unreliable across browsers.
+  // Fit the 800x600 stage into the available space, while never
+  // letting the page overflow.
+  // - In a portrait-shaped viewport, prefer a 4:3 box at full viewport
+  //   width (height = width × 3/4). Toolbar / inspector / tray sit
+  //   above and below at their natural heights.
+  // - When chrome is tall enough that the desired stage would push
+  //   the layout past the viewport, shrink the stage so it fits.
+  //   Stage stays 4:3 (we shrink width too).
+  // - Landscape viewports keep the original flex behavior.
   useEffect(() => {
     function fit() {
       const stage = stageRef.current;
       if (!stage) return;
       const wrap = stage.parentElement as HTMLElement | null;
       if (!wrap) return;
+      const editor = wrap.parentElement as HTMLElement | null;
       const winW = window.innerWidth;
       const winH = window.innerHeight;
       const stageAspect = STAGE_W / STAGE_H;
-      if (winW / winH < stageAspect) {
+
+      if (winW / winH < stageAspect && editor) {
+        // Sum the heights of every editor child that ISN'T the stage
+        // wrap — that's how much chrome wants. The remainder is what
+        // we have to spend on the stage.
+        let chromeH = 0;
+        for (const el of Array.from(editor.children)) {
+          if (el === wrap) continue;
+          chromeH += (el as HTMLElement).offsetHeight;
+        }
+        const desiredH = (winW * STAGE_H) / STAGE_W; // full-width 4:3
+        const availH = Math.max(0, winH - chromeH);
+        const stageH = Math.min(desiredH, availH);
+        const stageW = (stageH * STAGE_W) / STAGE_H;
+
         wrap.style.flex = "0 0 auto";
-        wrap.style.width = "100%";
+        wrap.style.width = `${stageW}px`;
+        wrap.style.height = `${stageH}px`;
         wrap.style.maxWidth = "100vw";
-        wrap.style.height = `${(winW * STAGE_H) / STAGE_W}px`;
         wrap.style.padding = "0";
       } else {
         wrap.style.flex = "";
         wrap.style.width = "";
-        wrap.style.maxWidth = "";
         wrap.style.height = "";
+        wrap.style.maxWidth = "";
         wrap.style.padding = "";
       }
       const rect = wrap.getBoundingClientRect();
@@ -67,7 +86,9 @@ export function SceneCanvas() {
     }
     fit();
     const ro = new ResizeObserver(fit);
+    const editor = stageRef.current?.parentElement?.parentElement;
     if (stageRef.current?.parentElement) ro.observe(stageRef.current.parentElement);
+    if (editor) ro.observe(editor);
     window.addEventListener("resize", fit);
     window.addEventListener("orientationchange", fit);
     return () => {
