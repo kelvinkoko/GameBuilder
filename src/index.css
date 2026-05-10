@@ -13,7 +13,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body, #root { height: 100%; margin: 0; }
+html, body, #root { height: 100%; margin: 0; overflow: hidden; }
 
 body {
   font-family: "Comic Sans MS", "Chalkboard SE", "Marker Felt", system-ui, -apple-system, sans-serif,
@@ -36,9 +36,22 @@ button {
 img { -webkit-user-drag: none; user-select: none; }
 
 .app {
+  position: relative;
   height: 100%;
+  width: 100%;
+  background: var(--bg);
+  overflow: hidden;
+}
+.app-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1000px;
+  height: 800px;
   display: flex;
   flex-direction: column;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 .topbar {
@@ -541,67 +554,6 @@ img { -webkit-user-drag: none; user-select: none; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
 
-
-/* Small screens: collapse text labels and tighten chrome so the canvas
-   gets the most room. Modals keep their text since they have their
-   own width budget. */
-@media (max-width: 720px) {
-  .toolrow .bigbtn .label,
-  .tray .bigbtn .label {
-    display: none;
-  }
-  .toolrow .bigbtn,
-  .tray .bigbtn {
-    padding: 10px;
-    min-width: var(--tap);
-  }
-  .game-name-btn {
-    font-size: 16px;
-    padding: 6px 10px;
-    max-width: 40vw;
-  }
-  .topbar h1 { font-size: 18px; }
-  :root { --tap: 56px; }
-  .topbar { padding: 6px 12px; }
-  .toolrow { padding: 6px 8px; gap: 6px; }
-  .tray { padding: 6px 8px; gap: 6px; min-height: 0; }
-  .tray .sticker { width: 56px; height: 56px; }
-  .tray .sticker img { width: 44px; height: 44px; }
-  .iconbtn { font-size: 26px; }
-  .bigbtn .ico { font-size: 24px; }
-  .inspector { max-height: 28vh; padding: 6px 8px; }
-}
-
-/* Note: when the viewport is taller than 4:3, SceneCanvas forces the
-   stage-wrap inline height = width × 3/4 directly via JS. CSS-based
-   `aspect-ratio` + flex was unreliable across browsers, so the JS
-   path is authoritative. */
-
-/* Very narrow viewports: hide the game-name button so the toolbar
-   children always fit on a single line without overflowing. The kid
-   can still rename via Home (game cards). */
-@media (max-width: 540px) {
-  .game-name-btn { display: none; }
-}
-
-/* Short viewports (phone landscape mostly) — every pixel of vertical
-   space matters. Compact the inspector and hide the tray while an
-   actor is selected so the stage isn't squeezed to nothing. The kid
-   taps an empty area of the stage to deselect; the tray comes back. */
-@media (max-height: 540px) {
-  .editor:has(.inspector) .tray { display: none; }
-  .inspector {
-    max-height: 40vh;
-    padding: 4px 8px;
-    gap: 4px;
-  }
-  .inspector .header {
-    gap: 6px;
-    font-size: 14px;
-  }
-  .chip {
-    padding: 4px 10px;
-    font-size: 12px;
-  }
-  .chip .x { width: 18px; height: 18px; font-size: 12px; }
-}
+/* The whole app renders at a fixed 1000×800 design size and the App
+   component scales it to fit the viewport with a single CSS
+   transform. No media queries — every pixel scales proportionally. */
