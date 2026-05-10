@@ -562,7 +562,6 @@ img { -webkit-user-drag: none; user-select: none; }
   }
   .topbar h1 { font-size: 18px; }
   :root { --tap: 56px; }
-  .editor .stage-wrap { padding: 0; }
   .topbar { padding: 6px 12px; }
   .toolrow { padding: 6px 8px; gap: 6px; }
   .tray { padding: 6px 8px; gap: 6px; min-height: 0; }
