@@ -550,49 +550,6 @@ img { -webkit-user-drag: none; user-select: none; }
   display: none;
 }
 
-/* "Turn me sideways" full-screen prompt for small portrait screens. */
-.rotate-prompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  text-align: center;
-}
-.rotate-prompt-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink);
-}
-.rotate-prompt-card h2 {
-  font-size: 28px;
-  margin: 0;
-}
-.rotate-prompt-card p {
-  font-size: 18px;
-  margin: 0;
-  color: #6a584f;
-}
-.rotate-emoji {
-  font-size: 96px;
-  line-height: 1;
-  display: inline-block;
-  animation: rotate-wiggle 1.6s ease-in-out infinite;
-  transform-origin: center;
-}
-@keyframes rotate-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  35% { transform: rotate(-90deg); }
-  65% { transform: rotate(-90deg); }
-}
-@media (orientation: portrait) and (max-width: 600px) {
-  .rotate-prompt { display: flex; }
-}
 
 /* Small screens: collapse text labels and tighten chrome so the canvas
    gets the most room. Modals keep their text since they have their
@@ -623,6 +580,24 @@ img { -webkit-user-drag: none; user-select: none; }
   .iconbtn { font-size: 26px; }
   .bigbtn .ico { font-size: 24px; }
   .inspector { max-height: 28vh; padding: 6px 8px; }
+}
+
+/* Portrait phones: lock the stage-wrap to a 4:3 box that's exactly as
+   wide as the screen, with height = width × 3/4. The kid sees the
+   full canvas at maximum size for the available width; remaining
+   vertical space goes to inspector + tray + cream margin. */
+@media (orientation: portrait) and (max-width: 720px) {
+  .editor .stage-wrap {
+    flex: 0 0 auto;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  /* When chrome is hidden, give the stage the full viewport again
+     and let the regular fit math (min of sx, sy) take over. */
+  .editor.chrome-hidden .stage-wrap {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+  }
 }
 
 /* Short viewports (phone landscape mostly) — every pixel of vertical
