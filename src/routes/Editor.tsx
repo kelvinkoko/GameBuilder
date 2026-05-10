@@ -6,6 +6,8 @@ import { AssetTray, StockPicker } from "../editor/AssetTray";
 import { DrawingPad } from "../editor/DrawingPad";
 import { BehaviorPicker } from "../editor/BehaviorPicker";
 import { Inspector } from "../editor/Inspector";
+import { RotatePrompt } from "../ui/RotatePrompt";
+import { sounds } from "../audio/sounds";
 
 type Props = {
   onPlay: () => void;
@@ -20,14 +22,26 @@ export function Editor({ onPlay, onHome }: Props) {
   const [stockOpen, setStockOpen] = useState(false);
   const [drawOpen, setDrawOpen] = useState(false);
   const [behaviorOpen, setBehaviorOpen] = useState(false);
+  const [chromeHidden, setChromeHidden] = useState(false);
 
   return (
-    <div className="editor">
+    <div className={`editor ${chromeHidden ? "chrome-hidden" : ""}`}>
       <Toolbar onPlay={onPlay} onHome={onHome} />
       <div className="stage-wrap">
         <SceneCanvas />
+        <button
+          className="chrome-toggle"
+          aria-label={chromeHidden ? "Show buttons" : "Hide buttons"}
+          title={chromeHidden ? "Show buttons" : "Hide buttons"}
+          onClick={() => {
+            sounds.pop();
+            setChromeHidden((v) => !v);
+          }}
+        >
+          {chromeHidden ? "▾" : "▴"}
+        </button>
       </div>
-      {selectedActorId && (
+      {selectedActorId && !chromeHidden && (
         <Inspector onAddBehavior={() => setBehaviorOpen(true)} />
       )}
       <AssetTray
@@ -70,6 +84,7 @@ export function Editor({ onPlay, onHome }: Props) {
           ⬇ Tap <b>Add</b> or <b>Draw</b> to start
         </div>
       )}
+      <RotatePrompt />
     </div>
   );
 }
