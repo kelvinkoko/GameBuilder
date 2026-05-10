@@ -43,7 +43,9 @@ export function SceneCanvas() {
       const padding = 4;
       const sx = (rect.width - padding) / STAGE_W;
       const sy = (rect.height - padding) / STAGE_H;
-      setScale(Math.min(sx, sy, 1.5));
+      // Max 4:3 fit within the wrap. Scale freely beyond 1 so the
+      // stage takes the most space the wrap can offer.
+      setScale(Math.min(sx, sy));
     }
     fit();
     const ro = new ResizeObserver(fit);
