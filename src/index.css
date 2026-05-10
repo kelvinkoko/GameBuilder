@@ -36,22 +36,12 @@ button {
 img { -webkit-user-drag: none; user-select: none; }
 
 .app {
-  position: relative;
   height: 100%;
   width: 100%;
-  background: var(--bg);
-  overflow: hidden;
-}
-.app-stage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1000px;
-  height: 800px;
   display: flex;
   flex-direction: column;
-  transform-origin: 0 0;
-  will-change: transform;
+  background: var(--bg);
+  overflow: hidden;
 }
 
 .topbar {
