@@ -97,10 +97,8 @@ export function SceneCanvas() {
       ref={stageRef}
       className={`stage ${bgClass(project.background)}`}
       style={{
-        width: STAGE_W,
-        height: STAGE_H,
-        transform: `scale(${scale})`,
-        transformOrigin: "center",
+        width: STAGE_W * scale,
+        height: STAGE_H * scale,
         ...bgStyle(project.background)
       }}
       onPointerDown={(e) => {
@@ -109,18 +107,26 @@ export function SceneCanvas() {
     >
       {project.actors.map((actor) => {
         const asset = project.assets.find((a) => a.id === actor.assetId);
+        const tile = 80 * scale;
         return (
           <div
             key={actor.id}
             className={`actor ${selectedActorId === actor.id ? "selected" : ""}`}
             style={{
-              left: actor.x - 40,
-              top: actor.y - 40,
+              left: (actor.x - 40) * scale,
+              top: (actor.y - 40) * scale,
+              width: tile,
+              height: tile,
               transform: `scale(${actor.scale}) rotate(${actor.rotation}deg)`
             }}
             onPointerDown={(e) => drag(actor.id, e)}
           >
-            <img src={assetSrc(asset)} alt={asset?.name ?? ""} draggable={false} />
+            <img
+              src={assetSrc(asset)}
+              alt={asset?.name ?? ""}
+              draggable={false}
+              style={{ width: tile, height: tile }}
+            />
           </div>
         );
       })}
