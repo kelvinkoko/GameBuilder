@@ -52,7 +52,7 @@ img { -webkit-user-drag: none; user-select: none; }
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background: var(--panel);
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
@@ -72,7 +72,7 @@ img { -webkit-user-drag: none; user-select: none; }
   color: var(--primary-ink);
   font-size: 18px;
   font-weight: 700;
-  padding: 10px 18px;
+  padding: 6px 16px;
   box-shadow: var(--shadow);
   display: inline-flex;
   align-items: center;
@@ -209,7 +209,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .editor .toolrow {
   display: flex;
   gap: 10px;
-  padding: 10px;
+  padding: 6px 10px;
   background: var(--panel);
   overflow: hidden;
   align-items: center;
@@ -228,11 +228,10 @@ img { -webkit-user-drag: none; user-select: none; }
 .tray {
   display: flex;
   gap: 10px;
-  padding: 10px;
+  padding: 6px 10px;
   background: var(--panel);
   overflow-x: auto;
   border-top: 2px solid #f1e8d8;
-  min-height: 96px;
   align-items: center;
 }
 .tray .sticker {
@@ -328,10 +327,10 @@ img { -webkit-user-drag: none; user-select: none; }
 .inspector {
   background: var(--panel);
   border-top: 2px solid #f1e8d8;
-  padding: 10px 12px;
+  padding: 6px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   /* Fixed height so selecting / deselecting an actor never resizes
      the stage. Behaviour chips scroll if there are too many. */
   height: 140px;
