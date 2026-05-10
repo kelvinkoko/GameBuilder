@@ -525,6 +525,75 @@ img { -webkit-user-drag: none; user-select: none; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
 
+/* Floating button on the stage that hides/shows the toolbar + tray
+   so the canvas can fill the screen during placement. */
+.chrome-toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  z-index: 10;
+}
+.editor.chrome-hidden .toolrow,
+.editor.chrome-hidden .tray,
+.editor.chrome-hidden .inspector {
+  display: none;
+}
+
+/* "Turn me sideways" full-screen prompt for small portrait screens. */
+.rotate-prompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+.rotate-prompt-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+}
+.rotate-prompt-card h2 {
+  font-size: 28px;
+  margin: 0;
+}
+.rotate-prompt-card p {
+  font-size: 18px;
+  margin: 0;
+  color: #6a584f;
+}
+.rotate-emoji {
+  font-size: 96px;
+  line-height: 1;
+  display: inline-block;
+  animation: rotate-wiggle 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes rotate-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(-90deg); }
+  65% { transform: rotate(-90deg); }
+}
+@media (orientation: portrait) and (max-width: 600px) {
+  .rotate-prompt { display: flex; }
+}
+
 /* Small screens: collapse text labels on toolbar/tray buttons so the
    icons stay readable and the row stops overflowing. Modals keep
    their text since they have their own width budget. */

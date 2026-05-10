@@ -3,6 +3,7 @@ import { BigButton } from "../ui/BigButton";
 import { useProjectStore } from "../state/projectStore";
 import { startGame, type GameHandle } from "../runtime/PhaserGame";
 import { TouchControls } from "../runtime/TouchControls";
+import { RotatePrompt } from "../ui/RotatePrompt";
 
 type Props = {
   onBack: () => void;
@@ -132,6 +133,7 @@ export function Play({ onBack }: Props) {
 
   return (
     <div ref={rootRef} className="play">
+      <RotatePrompt />
       <div className="play-topbar">
         <BigButton icon="↩️" label="Edit" variant="ghost" onClick={onBack} />
         <div className="score">
