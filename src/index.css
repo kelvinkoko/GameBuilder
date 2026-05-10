@@ -546,3 +546,13 @@ img { -webkit-user-drag: none; user-select: none; }
 /* The whole app renders at a fixed 1000×800 design size and the App
    component scales it to fit the viewport with a single CSS
    transform. No media queries — every pixel scales proportionally. */
+
+/* One small concession: when the viewport is narrow enough that the
+   toolbar / tray labels would crowd the icons, drop the labels so
+   it stays a single tidy row. */
+@media (max-width: 720px) {
+  .toolrow .bigbtn .label,
+  .tray .bigbtn .label {
+    display: none;
+  }
+}
