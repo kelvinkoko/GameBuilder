@@ -208,6 +208,12 @@ img { -webkit-user-drag: none; user-select: none; }
   overflow-x: auto;
   align-items: center;
 }
+.editor .toolrow .bigbtn,
+.editor .toolrow .iconbtn {
+  flex: 0 0 auto;
+  height: var(--tap);
+  min-height: var(--tap);
+}
 
 .tray {
   display: flex;
@@ -221,8 +227,8 @@ img { -webkit-user-drag: none; user-select: none; }
 }
 .tray .sticker {
   flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
+  width: var(--tap);
+  height: var(--tap);
   background: #fff7e6;
   border-radius: 14px;
   display: flex;
@@ -230,6 +236,12 @@ img { -webkit-user-drag: none; user-select: none; }
   justify-content: center;
   font-size: 40px;
   box-shadow: var(--shadow);
+}
+.tray .bigbtn,
+.tray .iconbtn {
+  height: var(--tap);
+  min-height: var(--tap);
+  flex: 0 0 auto;
 }
 .tray .sticker img { width: 56px; height: 56px; }
 .tray .sticker.add { background: var(--good); color: #064430; }
