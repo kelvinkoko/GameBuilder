@@ -590,12 +590,14 @@ img { -webkit-user-drag: none; user-select: none; }
   .editor .stage-wrap {
     flex: 0 0 auto;
     width: 100%;
+    height: calc(100vw * 3 / 4);
     aspect-ratio: 4 / 3;
   }
   /* When chrome is hidden, give the stage the full viewport again
      and let the regular fit math (min of sx, sy) take over. */
   .editor.chrome-hidden .stage-wrap {
     flex: 1 1 auto;
+    height: auto;
     aspect-ratio: auto;
   }
 }
