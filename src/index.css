@@ -582,11 +582,13 @@ img { -webkit-user-drag: none; user-select: none; }
   .inspector { max-height: 28vh; padding: 6px 8px; }
 }
 
-/* Portrait phones: lock the stage-wrap to a 4:3 box that's exactly as
-   wide as the screen, with height = width × 3/4. The kid sees the
-   full canvas at maximum size for the available width; remaining
-   vertical space goes to inspector + tray + cream margin. */
-@media (orientation: portrait) and (max-width: 720px) {
+/* Whenever the window is taller than 4:3 (any portrait-ish shape:
+   phone portrait, narrowed desktop window, tablet portrait), lock
+   the stage-wrap to a 4:3 box that's exactly as wide as the screen,
+   with height = width × 3/4. The kid sees the full canvas at
+   maximum size for the available width; remaining vertical space
+   goes to inspector + tray + cream margin. */
+@media (max-aspect-ratio: 4 / 3) {
   .editor .stage-wrap {
     flex: 0 0 auto;
     width: 100%;
