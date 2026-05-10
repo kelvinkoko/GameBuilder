@@ -33,11 +33,10 @@ export function SceneCanvas() {
   const [scale, setScale] = useState(1);
 
   // Fit the 800x600 stage into the available space.
-  // When the viewport is taller than 4:3, force the wrap to the
-  // (width × 3/4) box so the stage takes the full width and we don't
-  // get vertical aspect-letterbox empty bands. CSS isn't reliable for
-  // this (Safari + flex + aspect-ratio quirks), so we set the wrap's
-  // inline styles directly.
+  // When the viewport is taller than 4:3, force the wrap to a 4:3 box
+  // at full viewport width (no padding, full bleed) so the canvas
+  // takes every horizontal pixel and the height matches at 4:3.
+  // CSS-only attempts at this were unreliable across browsers.
   useEffect(() => {
     function fit() {
       const stage = stageRef.current;
@@ -48,13 +47,17 @@ export function SceneCanvas() {
       const winH = window.innerHeight;
       const stageAspect = STAGE_W / STAGE_H;
       if (winW / winH < stageAspect) {
-        // Portrait-ish: wrap becomes a 4:3 box at full viewport width.
         wrap.style.flex = "0 0 auto";
+        wrap.style.width = "100%";
+        wrap.style.maxWidth = "100vw";
         wrap.style.height = `${(winW * STAGE_H) / STAGE_W}px`;
+        wrap.style.padding = "0";
       } else {
-        // Landscape-ish: let flex fill the remaining vertical space.
         wrap.style.flex = "";
+        wrap.style.width = "";
+        wrap.style.maxWidth = "";
         wrap.style.height = "";
+        wrap.style.padding = "";
       }
       const rect = wrap.getBoundingClientRect();
       const padding = 4;
