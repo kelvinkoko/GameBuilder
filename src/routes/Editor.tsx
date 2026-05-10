@@ -6,7 +6,6 @@ import { AssetTray, StockPicker } from "../editor/AssetTray";
 import { DrawingPad } from "../editor/DrawingPad";
 import { BehaviorPicker } from "../editor/BehaviorPicker";
 import { Inspector } from "../editor/Inspector";
-import { RotatePrompt } from "../ui/RotatePrompt";
 import { sounds } from "../audio/sounds";
 
 type Props = {
@@ -84,7 +83,6 @@ export function Editor({ onPlay, onHome }: Props) {
           ⬇ Tap <b>Add</b> or <b>Draw</b> to start
         </div>
       )}
-      <RotatePrompt />
     </div>
   );
 }
