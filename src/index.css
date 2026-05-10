@@ -205,9 +205,13 @@ img { -webkit-user-drag: none; user-select: none; }
   gap: 10px;
   padding: 10px;
   background: var(--panel);
-  overflow-x: auto;
+  overflow: hidden;
   align-items: center;
+  /* Never grow vertically when content overflows. The toolbar children
+     are sized so the row always fits at every viewport width. */
+  scrollbar-width: none;
 }
+.editor .toolrow::-webkit-scrollbar { display: none; }
 .editor .toolrow .bigbtn,
 .editor .toolrow .iconbtn {
   flex: 0 0 auto;
@@ -573,6 +577,13 @@ img { -webkit-user-drag: none; user-select: none; }
    stage-wrap inline height = width × 3/4 directly via JS. CSS-based
    `aspect-ratio` + flex was unreliable across browsers, so the JS
    path is authoritative. */
+
+/* Very narrow viewports: hide the game-name button so the toolbar
+   children always fit on a single line without overflowing. The kid
+   can still rename via Home (game cards). */
+@media (max-width: 540px) {
+  .game-name-btn { display: none; }
+}
 
 /* Short viewports (phone landscape mostly) — every pixel of vertical
    space matters. Compact the inspector and hide the tray while an
