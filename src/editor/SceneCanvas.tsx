@@ -33,11 +33,30 @@ export function SceneCanvas() {
   const [scale, setScale] = useState(1);
 
   // Fit the 800x600 stage into the available space.
+  // When the viewport is taller than 4:3, force the wrap to the
+  // (width × 3/4) box so the stage takes the full width and we don't
+  // get vertical aspect-letterbox empty bands. CSS isn't reliable for
+  // this (Safari + flex + aspect-ratio quirks), so we set the wrap's
+  // inline styles directly.
   useEffect(() => {
     function fit() {
-      const el = stageRef.current?.parentElement;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
+      const stage = stageRef.current;
+      if (!stage) return;
+      const wrap = stage.parentElement as HTMLElement | null;
+      if (!wrap) return;
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      const stageAspect = STAGE_W / STAGE_H;
+      if (winW / winH < stageAspect) {
+        // Portrait-ish: wrap becomes a 4:3 box at full viewport width.
+        wrap.style.flex = "0 0 auto";
+        wrap.style.height = `${(winW * STAGE_H) / STAGE_W}px`;
+      } else {
+        // Landscape-ish: let flex fill the remaining vertical space.
+        wrap.style.flex = "";
+        wrap.style.height = "";
+      }
+      const rect = wrap.getBoundingClientRect();
       const padding = 4;
       const sx = (rect.width - padding) / STAGE_W;
       const sy = (rect.height - padding) / STAGE_H;
@@ -47,9 +66,11 @@ export function SceneCanvas() {
     const ro = new ResizeObserver(fit);
     if (stageRef.current?.parentElement) ro.observe(stageRef.current.parentElement);
     window.addEventListener("resize", fit);
+    window.addEventListener("orientationchange", fit);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", fit);
+      window.removeEventListener("orientationchange", fit);
     };
   }, []);
 

@@ -557,20 +557,10 @@ img { -webkit-user-drag: none; user-select: none; }
   .inspector { max-height: 28vh; padding: 6px 8px; }
 }
 
-/* Whenever the window is taller than 4:3 (any portrait-ish shape:
-   phone portrait, narrowed desktop window, tablet portrait), lock
-   the stage-wrap to a 4:3 box that's exactly as wide as the screen,
-   with height = width × 3/4. The kid sees the full canvas at
-   maximum size for the available width; remaining vertical space
-   goes to inspector + tray + cream margin. */
-@media (max-aspect-ratio: 4 / 3) {
-  .editor .stage-wrap {
-    flex: 0 0 auto;
-    width: 100%;
-    height: calc(100vw * 3 / 4);
-    aspect-ratio: 4 / 3;
-  }
-}
+/* Note: when the viewport is taller than 4:3, SceneCanvas forces the
+   stage-wrap inline height = width × 3/4 directly via JS. CSS-based
+   `aspect-ratio` + flex was unreliable across browsers, so the JS
+   path is authoritative. */
 
 /* Short viewports (phone landscape mostly) — every pixel of vertical
    space matters. Compact the inspector and hide the tray while an
