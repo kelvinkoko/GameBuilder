@@ -9,7 +9,7 @@
   --info: #118ab2;
   --shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
   --radius: 18px;
-  --tap: 64px;
+  --tap: 52px;
 }
 
 * { box-sizing: border-box; }
