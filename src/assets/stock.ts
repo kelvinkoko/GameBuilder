@@ -356,3 +356,38 @@ const stockById = new Map(STOCK_STICKERS.map((s) => [s.id, s]));
 export function findStock(stockId: string): StockSticker | undefined {
   return stockById.get(stockId);
 }
+
+/**
+ * Rasterise each emoji to a PNG via canvas. SVG <img> data-URLs are
+ * sandboxed and can't read webfonts loaded by the host page, so on
+ * non-Apple devices stock stickers used to fall back to the system
+ * emoji font (Segoe / generic). A canvas CAN use loaded webfonts —
+ * including Noto Color Emoji — so we rasterise once at app boot
+ * (after fonts.ready) and replace every sticker's dataUrl with the
+ * canvas-rendered PNG, giving consistent emoji across all platforms.
+ */
+let rasterized = false;
+export function rasterizeStockStickers(): void {
+  if (rasterized) return;
+  if (typeof document === "undefined") return;
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.font = `${Math.floor(size * 0.85)}px "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (const sticker of STOCK_STICKERS) {
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillText(sticker.emoji, size / 2, size / 2);
+    try {
+      sticker.dataUrl = canvas.toDataURL("image/png");
+    } catch {
+      // toDataURL can throw in some sandboxed contexts; keep the
+      // SVG fallback in that case.
+    }
+  }
+  rasterized = true;
+}
