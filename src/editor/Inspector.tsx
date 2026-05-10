@@ -53,10 +53,19 @@ export function Inspector({ onAddBehavior }: { onAddBehavior: () => void }) {
   const updateActor = useProjectStore((s) => s.updateActor);
   const [tagOpen, setTagOpen] = useState(false);
 
-  if (!project || !id) return null;
-  const actor = project.actors.find((a) => a.id === id);
-  if (!actor) return null;
-  const asset = project.assets.find((a) => a.id === actor.assetId);
+  if (!project) return null;
+  const actor = id ? project.actors.find((a) => a.id === id) : undefined;
+  const asset = actor ? project.assets.find((a) => a.id === actor.assetId) : undefined;
+
+  // Empty state — keep the inspector strip in the layout so selecting
+  // an actor doesn't resize the stage.
+  if (!actor) {
+    return (
+      <div className="inspector inspector-empty">
+        <span className="hint">👆 Tap a sticker on the stage to edit it</span>
+      </div>
+    );
+  }
 
   return (
     <div className="inspector">

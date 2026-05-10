@@ -332,8 +332,19 @@ img { -webkit-user-drag: none; user-select: none; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 35vh;
+  /* Fixed height so selecting / deselecting an actor never resizes
+     the stage. Behaviour chips scroll if there are too many. */
+  height: 140px;
+  flex: 0 0 auto;
   overflow-y: auto;
+}
+.inspector-empty {
+  align-items: center;
+  justify-content: center;
+}
+.inspector-empty .hint {
+  color: #7a6960;
+  font-size: 16px;
 }
 .inspector .header {
   display: flex;
