@@ -594,9 +594,9 @@ img { -webkit-user-drag: none; user-select: none; }
   .rotate-prompt { display: flex; }
 }
 
-/* Small screens: collapse text labels on toolbar/tray buttons so the
-   icons stay readable and the row stops overflowing. Modals keep
-   their text since they have their own width budget. */
+/* Small screens: collapse text labels and tighten chrome so the canvas
+   gets the most room. Modals keep their text since they have their
+   own width budget. */
 @media (max-width: 720px) {
   .toolrow .bigbtn .label,
   .tray .bigbtn .label {
@@ -613,10 +613,6 @@ img { -webkit-user-drag: none; user-select: none; }
     max-width: 40vw;
   }
   .topbar h1 { font-size: 18px; }
-
-  /* Give the canvas as much room as possible: drop the stage-wrap
-     padding, tighten the toolbar / tray, and shrink tap targets a
-     bit so the chrome doesn't dominate vertical space. */
   :root { --tap: 56px; }
   .editor .stage-wrap { padding: 0; }
   .topbar { padding: 6px 12px; }
@@ -627,4 +623,26 @@ img { -webkit-user-drag: none; user-select: none; }
   .iconbtn { font-size: 26px; }
   .bigbtn .ico { font-size: 24px; }
   .inspector { max-height: 28vh; padding: 6px 8px; }
+}
+
+/* Short viewports (phone landscape mostly) — every pixel of vertical
+   space matters. Compact the inspector and hide the tray while an
+   actor is selected so the stage isn't squeezed to nothing. The kid
+   taps an empty area of the stage to deselect; the tray comes back. */
+@media (max-height: 540px) {
+  .editor:has(.inspector) .tray { display: none; }
+  .inspector {
+    max-height: 40vh;
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .inspector .header {
+    gap: 6px;
+    font-size: 14px;
+  }
+  .chip {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .chip .x { width: 18px; height: 18px; font-size: 12px; }
 }
