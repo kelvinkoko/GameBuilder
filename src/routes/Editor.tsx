@@ -27,9 +27,7 @@ export function Editor({ onPlay, onHome }: Props) {
       <div className="stage-wrap">
         <SceneCanvas />
       </div>
-      {selectedActorId && (
-        <Inspector onAddBehavior={() => setBehaviorOpen(true)} />
-      )}
+      <Inspector onAddBehavior={() => setBehaviorOpen(true)} />
       <AssetTray
         onPickStock={() => setStockOpen(true)}
         onDraw={() => setDrawOpen(true)}
