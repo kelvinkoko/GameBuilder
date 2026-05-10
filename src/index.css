@@ -552,7 +552,8 @@ img { -webkit-user-drag: none; user-select: none; }
    it stays a single tidy row. */
 @media (max-width: 720px) {
   .toolrow .bigbtn .label,
-  .tray .bigbtn .label {
+  .tray .bigbtn .label,
+  .inspector .bigbtn .label {
     display: none;
   }
 }

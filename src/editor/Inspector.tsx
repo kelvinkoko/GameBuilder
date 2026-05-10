@@ -68,30 +68,26 @@ export function Inspector({ onAddBehavior }: { onAddBehavior: () => void }) {
         <div className="spacer" />
         <BigButton
           icon="🔼"
+          label="Bigger"
           variant="ghost"
-          iconOnly
-          title="Bigger"
           onClick={() => updateActor(actor.id, { scale: Math.min(3, actor.scale + 0.2) })}
         />
         <BigButton
           icon="🔽"
+          label="Smaller"
           variant="ghost"
-          iconOnly
-          title="Smaller"
           onClick={() => updateActor(actor.id, { scale: Math.max(0.4, actor.scale - 0.2) })}
         />
         <BigButton
           icon="➕"
+          label="Copy"
           variant="good"
-          iconOnly
-          title="Copy"
           onClick={() => copyActor(actor.id)}
         />
         <BigButton
           icon="🗑️"
+          label="Delete"
           variant="accent"
-          iconOnly
-          title="Delete"
           onClick={() => removeActor(actor.id)}
         />
       </div>
