@@ -58,11 +58,16 @@ export function Inspector({ onAddBehavior }: { onAddBehavior: () => void }) {
   const asset = actor ? project.assets.find((a) => a.id === actor.assetId) : undefined;
 
   // Empty state — keep the inspector strip in the layout so selecting
-  // an actor doesn't resize the stage.
+  // an actor doesn't resize the stage. Skip the "tap a sticker" hint
+  // when the stage has no stickers yet (the Editor shows its own
+  // "Tap Add or Draw to start" prompt in that case).
   if (!actor) {
+    const hasActors = project.actors.length > 0;
     return (
       <div className="inspector inspector-empty">
-        <span className="hint">👆 Tap a sticker on the stage to edit it</span>
+        {hasActors && (
+          <span className="hint">👆 Tap a sticker on the stage to edit it</span>
+        )}
       </div>
     );
   }
