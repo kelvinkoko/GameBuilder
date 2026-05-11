@@ -211,10 +211,11 @@ img { -webkit-user-drag: none; user-select: none; }
   gap: 10px;
   padding: 6px 10px;
   background: var(--panel);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   align-items: center;
-  /* Never grow vertically when content overflows. The toolbar children
-     are sized so the row always fits at every viewport width. */
+  /* Allow horizontal scroll when content overflows, but hide the
+     visible scrollbar so the toolbar never grows vertically. */
   scrollbar-width: none;
 }
 .editor .toolrow::-webkit-scrollbar { display: none; }
@@ -231,9 +232,12 @@ img { -webkit-user-drag: none; user-select: none; }
   padding: 6px 10px;
   background: var(--panel);
   overflow-x: auto;
+  overflow-y: hidden;
   border-top: 2px solid #f1e8d8;
   align-items: center;
+  scrollbar-width: none;
 }
+.tray::-webkit-scrollbar { display: none; }
 .tray .sticker {
   flex: 0 0 auto;
   width: var(--tap);
