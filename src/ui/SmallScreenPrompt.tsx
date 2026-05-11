@@ -8,10 +8,10 @@ export function SmallScreenPrompt({ onContinue }: Props) {
   return (
     <div className="small-screen-prompt">
       <div className="ssp-card">
-        <div className="ssp-emoji">📱 ➡️ 📐</div>
+        <div className="ssp-emoji">📱 ➡️ 💻</div>
         <h1>Best on a tablet or laptop</h1>
         <p>Game Builder is designed for a bigger screen.</p>
-        <p>It will still work here — buttons just get small.</p>
+        <p>You can still try here, but it may not be the best experience.</p>
         <BigButton
           icon="▶️"
           label="Try here anyway"
