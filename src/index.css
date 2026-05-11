@@ -557,9 +557,37 @@ img { -webkit-user-drag: none; user-select: none; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
 
-/* The whole app renders at a fixed 1000×800 design size and the App
-   component scales it to fit the viewport with a single CSS
-   transform. No media queries — every pixel scales proportionally. */
+/* Small-screen welcome / warning */
+.small-screen-prompt {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 16px;
+  text-align: center;
+}
+.ssp-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 380px;
+}
+.ssp-emoji { font-size: 56px; line-height: 1; }
+.small-screen-prompt h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--ink);
+}
+.small-screen-prompt p {
+  margin: 0;
+  color: #6a584f;
+  font-size: 16px;
+}
+.small-screen-prompt .bigbtn { margin-top: 8px; }
+
 
 /* One small concession: when the viewport is narrow enough that the
    toolbar / tray labels would crowd the icons, drop the labels so
