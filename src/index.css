@@ -384,10 +384,12 @@ img { -webkit-user-drag: none; user-select: none; }
 }
 
 .play {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   background: black;
+  min-height: 0;
+  overflow: hidden;
 }
 .play .play-topbar {
   display: flex;
@@ -405,9 +407,15 @@ img { -webkit-user-drag: none; user-select: none; }
   text-shadow: 0 2px 2px rgba(0,0,0,0.5);
 }
 .play .game-host {
-  flex: 1;
+  flex: 1 1 0;
   position: relative;
   min-height: 0;
+  overflow: hidden;
+}
+.play .game-host canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
 }
 .endcard {
   position: absolute;
