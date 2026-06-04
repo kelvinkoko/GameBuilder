@@ -5,10 +5,13 @@
 // so it appears indistinguishable in the tray from sprites she draws
 // herself — the message is "yours could go here too".
 
-const wrap = (body: string) =>
-  `data:image/svg+xml;utf8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`
-  )}`;
+const wrap = (body: string) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`;
+  // base64 is more reliable than percent-encoded URL across browsers.
+  // Chrome has gotten stricter about non-standard ';utf8' parameters
+  // and edge cases of encodeURIComponent on SVG; base64 sidesteps both.
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+};
 
 export type Sketch = {
   id: string;
