@@ -173,10 +173,12 @@ export function aquariumTemplate(): GameProject {
   const swim: Behavior[] = [
     { kind: "move", dir: "wander", speed: 1 },
     { kind: "bounce" },
+    { kind: "onTap", action: "grow" },
     { kind: "onTap", action: "sound" }
   ];
   const float: Behavior[] = [
     { kind: "move", dir: "up", speed: 1 },
+    { kind: "onTap", action: "vanish" },
     { kind: "onTap", action: "sound" }
   ];
 
@@ -201,8 +203,15 @@ export function aquariumTemplate(): GameProject {
     assets: [fishOrange, fishPink, fishBlue, starfish, crab, seaweed, bubble],
     actors: [
       // Decorative seaweed first so it draws behind the swimmers.
-      place(seaweed, 100, 480, 1.2, []),
-      place(seaweed, 700, 470, 1, []),
+      // Tapping makes it grow and chime.
+      place(seaweed, 100, 480, 1.2, [
+        { kind: "onTap", action: "grow" },
+        { kind: "onTap", action: "sound" }
+      ]),
+      place(seaweed, 700, 470, 1, [
+        { kind: "onTap", action: "grow" },
+        { kind: "onTap", action: "sound" }
+      ]),
       // Fish wandering around the middle.
       place(fishOrange, 200, 200, 1.1, swim),
       place(fishPink, 540, 280, 1, swim),
@@ -212,11 +221,13 @@ export function aquariumTemplate(): GameProject {
       place(crab, 320, 520, 1, [
         { kind: "move", dir: "wander", speed: 1 },
         { kind: "bounce" },
+        { kind: "onTap", action: "grow" },
         { kind: "onTap", action: "sound" }
       ]),
       place(starfish, 460, 530, 0.9, [
         { kind: "spin", speed: 1 },
-        { kind: "onTap", action: "grow" }
+        { kind: "onTap", action: "grow" },
+        { kind: "onTap", action: "sound" }
       ]),
       // A few rising bubbles.
       place(bubble, 150, 540, 0.6, float),
