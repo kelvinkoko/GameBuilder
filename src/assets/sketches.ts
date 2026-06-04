@@ -6,10 +6,12 @@
 // herself — the message is "yours could go here too".
 
 const wrap = (body: string) => {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`;
+  // Explicit width/height (not just viewBox) so Phaser's texture loader
+  // can determine the intrinsic size and rasterise correctly — without
+  // them Phaser produces a black/empty texture even though an HTML
+  // <img> renders fine.
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">${body}</svg>`;
   // base64 is more reliable than percent-encoded URL across browsers.
-  // Chrome has gotten stricter about non-standard ';utf8' parameters
-  // and edge cases of encodeURIComponent on SVG; base64 sidesteps both.
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
