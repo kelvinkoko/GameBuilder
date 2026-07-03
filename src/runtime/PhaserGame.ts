@@ -49,6 +49,24 @@ class GameScene extends Phaser.Scene {
   private touchInput: TouchInput = { left: false, right: false, up: false, down: false, jump: false };
   private timeRemaining: number | null = null;
   private lastReportedSeconds = -1;
+  private voiceCache: Map<string, HTMLAudioElement> = new Map();
+
+  playVoice(soundId?: string) {
+    if (!soundId) return;
+    const sound = this.project.sounds?.find((s) => s.id === soundId);
+    if (!sound) return;
+    let audio = this.voiceCache.get(soundId);
+    if (!audio) {
+      audio = new Audio(sound.dataUrl);
+      this.voiceCache.set(soundId, audio);
+    }
+    try {
+      audio.currentTime = 0;
+      void audio.play();
+    } catch {
+      // Best-effort playback.
+    }
+  }
 
   init(data: { project: GameProject; callbacks: GameCallbacks }) {
     this.project = data.project;
@@ -179,7 +197,7 @@ class GameScene extends Phaser.Scene {
     sprite.on("pointerdown", () => {
       for (const b of actor.behaviors) {
         if (b.kind !== "onTap") continue;
-        this.handleTap(sprite, b.action);
+        this.handleTap(sprite, b.action, b.soundId);
       }
     });
 
@@ -212,11 +230,14 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  handleTap(sprite: Phaser.Physics.Arcade.Sprite, action: TapAction) {
+  handleTap(sprite: Phaser.Physics.Arcade.Sprite, action: TapAction, soundId?: string) {
     if (this.ended) return;
     switch (action) {
       case "sound":
         sounds.boop();
+        break;
+      case "voice":
+        this.playVoice(soundId);
         break;
       case "vanish":
         sounds.whoosh();

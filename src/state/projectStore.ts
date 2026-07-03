@@ -6,6 +6,7 @@ import type {
   Behavior,
   Background,
   GameProject,
+  RecordedSound,
   Rule
 } from "../types";
 import { saveGame } from "./library";
@@ -26,6 +27,7 @@ type State = {
   addBehavior: (actorId: string, b: Behavior) => void;
   removeBehavior: (actorId: string, index: number) => void;
   setRules: (rules: Rule[]) => void;
+  addSound: (dataUrl: string) => RecordedSound;
 };
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -153,7 +155,18 @@ export const useProjectStore = create<State>((set) => ({
     ),
 
   setRules: (rules) =>
-    set((s) => patchProject(s, (p) => ({ ...p, rules })))
+    set((s) => patchProject(s, (p) => ({ ...p, rules }))),
+
+  addSound: (dataUrl) => {
+    const sound: RecordedSound = { id: uuid(), dataUrl };
+    set((s) =>
+      patchProject(s, (p) => ({
+        ...p,
+        sounds: [...(p.sounds ?? []), sound]
+      }))
+    );
+    return sound;
+  }
 }));
 
 export function newBlankProject(name = "My game"): GameProject {

@@ -1,5 +1,7 @@
 import { Modal } from "../ui/Modal";
 import { BigButton } from "../ui/BigButton";
+import { VoiceRecorder } from "./VoiceRecorder";
+import { useProjectStore } from "../state/projectStore";
 import type { Behavior, CollideEffect } from "../types";
 import { TAG_OPTIONS } from "../types";
 import { useState } from "react";
@@ -37,11 +39,13 @@ const CARDS: Card[] = [
 ];
 
 export function BehaviorPicker({ open, onClose, onAdd }: Props) {
+  const addSound = useProjectStore((s) => s.addSound);
   const [collidePicker, setCollidePicker] = useState<null | {
     effect: CollideEffect;
     label: string;
     ico: string;
   }>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -60,6 +64,13 @@ export function BehaviorPicker({ open, onClose, onAdd }: Props) {
             <span className="name">{c.name}</span>
           </button>
         ))}
+        <button
+          className="behavior-card"
+          onClick={() => setVoiceOpen(true)}
+        >
+          <span className="ico">🎤</span>
+          <span className="name">Tap: my voice</span>
+        </button>
         <button
           className="behavior-card"
           onClick={() => setCollidePicker({ effect: "score", label: "Touch: score", ico: "⭐" })}
@@ -99,6 +110,17 @@ export function BehaviorPicker({ open, onClose, onAdd }: Props) {
       <div className="modal-actions">
         <BigButton icon="✕" label="Cancel" variant="ghost" onClick={onClose} />
       </div>
+
+      <VoiceRecorder
+        open={voiceOpen}
+        onClose={() => setVoiceOpen(false)}
+        onSave={(dataUrl) => {
+          const sound = addSound(dataUrl);
+          onAdd({ kind: "onTap", action: "voice", soundId: sound.id });
+          setVoiceOpen(false);
+          onClose();
+        }}
+      />
 
       <Modal open={!!collidePicker} onClose={() => setCollidePicker(null)}>
         <h2>{collidePicker?.label}</h2>
