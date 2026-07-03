@@ -12,14 +12,19 @@ export type Asset = {
 export type MoveDir = "left" | "right" | "up" | "down" | "follow" | "wander";
 export type Speed = 1 | 2 | 3;
 
-export type TapAction = "sound" | "vanish" | "grow" | "shrink" | "score";
+export type TapAction = "sound" | "vanish" | "grow" | "shrink" | "score" | "voice";
 export type CollideEffect = "score" | "vanish" | "win" | "lose" | "sound" | "block";
+
+export type RecordedSound = {
+  id: string;
+  dataUrl: string;
+};
 
 export type Behavior =
   | { kind: "move"; dir: MoveDir; speed: Speed }
   | { kind: "bounce" }
   | { kind: "spin"; speed: Speed }
-  | { kind: "onTap"; action: TapAction }
+  | { kind: "onTap"; action: TapAction; soundId?: string }
   | { kind: "collide"; withTag: string; effect: CollideEffect }
   | { kind: "controllable"; speed: Speed }
   | { kind: "platformer"; speed: Speed; jump: Speed }
@@ -52,6 +57,7 @@ export type GameProject = {
   assets: Asset[];
   actors: Actor[];
   rules: Rule[];
+  sounds?: RecordedSound[];
   createdAt: number;
   updatedAt: number;
 };

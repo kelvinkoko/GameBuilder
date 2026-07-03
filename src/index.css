@@ -569,6 +569,12 @@ img { -webkit-user-drag: none; user-select: none; }
 
 .confirm-text { font-size: 18px; padding: 8px 12px; }
 
+.rec-blink { animation: rec-pulse 1s ease-in-out infinite; }
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 /* Small-screen welcome / warning */
 .small-screen-prompt {
   position: fixed;
